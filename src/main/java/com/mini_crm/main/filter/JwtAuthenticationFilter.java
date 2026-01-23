@@ -23,9 +23,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getTokenFromRequest(request);
 
-        // Skip auth for login and public endpoints
+        // Skip auth for login, register and public endpoints
         String requestPath = request.getRequestURI();
-        if (requestPath.contains("/api/auth/login") || requestPath.contains("/api/auth/refresh")) {
+        if (requestPath.contains("/api/auth/login") || 
+            requestPath.contains("/api/auth/register") || 
+            requestPath.contains("/api/auth/refresh")) {
             filterChain.doFilter(request, response);
             return;
         }
