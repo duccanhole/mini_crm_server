@@ -39,8 +39,8 @@ public class UserService {
     }
 
     // Read by Phone Number
-    public Optional<User> getUserByPhoneNumber(String phone_number) {
-        return userRepository.findByPhoneNumber(phone_number);
+    public Optional<User> getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
     }
 
     // Update

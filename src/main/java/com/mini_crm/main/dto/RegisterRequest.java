@@ -3,7 +3,7 @@ package com.mini_crm.main.dto;
 public class RegisterRequest {
     private String name;
     private String email;
-    private String phone_number;
+    private String phoneNumber;
     private String password;
     private String confirmPassword;
     private String role;
@@ -11,19 +11,19 @@ public class RegisterRequest {
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String name, String email, String phone_number, String password, String confirmPassword) {
+    public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword) {
         this.name = name;
         this.email = email;
-        this.phone_number = phone_number;
+        this.phoneNumber = phoneNumber;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.role = "user"; // Default role
     }
 
-    public RegisterRequest(String name, String email, String phone_number, String password, String confirmPassword, String role) {
+    public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword, String role) {
         this.name = name;
         this.email = email;
-        this.phone_number = phone_number;
+        this.phoneNumber = phoneNumber;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.role = role;
@@ -45,12 +45,12 @@ public class RegisterRequest {
         this.email = email;
     }
 
-    public String getPhone_number() {
-        return phone_number;
+    public String getphoneNumber() {
+        return phoneNumber;
     }
 
-    public void setPhone_number(String phone_number) {
-        this.phone_number = phone_number;
+    public void setphoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getPassword() {

@@ -28,7 +28,7 @@ public class AuthController {
     private JwtTokenProvider jwtTokenProvider;
 
     // Login - POST /api/auth/login
-    // Can login with email or phone_number
+    // Can login with email or phoneNumber
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Optional<User> user = Optional.empty();
@@ -36,11 +36,6 @@ public class AuthController {
         // Try to find user by email
         if (loginRequest.getEmail() != null && !loginRequest.getEmail().isEmpty()) {
             user = userService.getUserByEmail(loginRequest.getEmail());
-        }
-        
-        // If not found by email, try to find by phone_number
-        if (user.isEmpty() && loginRequest.getPhone_number() != null && !loginRequest.getPhone_number().isEmpty()) {
-            user = userService.getUserByPhoneNumber(loginRequest.getPhone_number());
         }
 
         if (user.isPresent()) {
@@ -152,9 +147,9 @@ public class AuthController {
             );
         }
 
-        // Check if phone_number already exists (if provided)
-        if (registerRequest.getPhone_number() != null && !registerRequest.getPhone_number().isEmpty()) {
-            if (userService.getUserByPhoneNumber(registerRequest.getPhone_number()).isPresent()) {
+        // Check if phoneNumber already exists (if provided)
+        if (registerRequest.getphoneNumber() != null && !registerRequest.getphoneNumber().isEmpty()) {
+            if (userService.getUserByPhoneNumber(registerRequest.getphoneNumber()).isPresent()) {
                 return new ResponseEntity<>(
                         new ErrorResponse("Phone number already exists", HttpStatus.CONFLICT.value()),
                         HttpStatus.CONFLICT
@@ -166,7 +161,7 @@ public class AuthController {
         User newUser = new User();
         newUser.setName(registerRequest.getName());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setPhoneNumber(registerRequest.getPhone_number());
+        newUser.setPhoneNumber(registerRequest.getphoneNumber());
         // Hash password before saving
         newUser.setPassword(userService.hashPassword(registerRequest.getPassword()));
         newUser.setStatus("active");

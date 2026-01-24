@@ -16,8 +16,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone_number")
-    private String phone_number;
+    @Column(name = "phoneNumber")
+    private String phoneNumber;
 
     @Column(nullable = false)
     private String password;
@@ -32,10 +32,10 @@ public class User {
     public User() {
     }
 
-    public User(String name, String email, String phone_number, String password, String status, String role) {
+    public User(String name, String email, String phoneNumber, String password, String status, String role) {
         this.name = name;
         this.email = email;
-        this.phone_number = phone_number;
+        this.phoneNumber = phoneNumber;
         this.password = password;
         this.status = status;
         this.role = role;
@@ -67,11 +67,11 @@ public class User {
     }
 
     public String getPhoneNumber() {
-        return phone_number;
+        return phoneNumber;
     }
 
-    public void setPhoneNumber(String phone_number) {
-        this.phone_number = phone_number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getPassword() {
@@ -104,7 +104,7 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", phone_number='" + phone_number + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", password='" + password + '\'' +
                 ", status='" + status + '\'' +
                 ", role='" + role + '\'' +
