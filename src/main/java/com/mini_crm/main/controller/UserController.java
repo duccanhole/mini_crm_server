@@ -2,6 +2,9 @@ package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.UserService;
+import com.mini_crm.main.dto.SuccessResponse;
+import com.mini_crm.main.dto.ErrorResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,45 +23,66 @@ public class UserController {
 
     // Create - POST /api/users
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        Optional<User> userByEmail = userService.getUserByEmail(user.getEmail());
+        if (userByEmail.isPresent()) {
+            return new ResponseEntity<>(
+                    new ErrorResponse("Email is already exist",
+                            HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
+        Optional<User> userByPhoneNumber = userService.getUserByPhoneNumber(user.getPhoneNumber());
+        if (userByPhoneNumber.isPresent()) {
+            return new ResponseEntity<>(new ErrorResponse("Phone number is already exist",
+                    HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(userService.hashPassword(user.getPassword()));
         User createdUser = userService.createUser(user);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                new SuccessResponse<>("User created successfully", HttpStatus.CREATED.value(), createdUser),
+                HttpStatus.CREATED);
     }
 
     // Read All - GET /api/users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
         List<User> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessResponse<>(users), HttpStatus.OK);
     }
 
     // Read by ID - GET /api/users/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
-            return new ResponseEntity<>(user.get(), HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>(user.get()), HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 
     // Update - PUT /api/users/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        userDetails.setPassword(userService.hashPassword(userDetails.getPassword()));
         User updatedUser = userService.updateUser(id, userDetails);
         if (updatedUser != null) {
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>(updatedUser), HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 
     // Delete - DELETE /api/users/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
         if (deleted) {
-            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>("User deleted successfully", HttpStatus.OK.value(), null),
+                    HttpStatus.OK);
         }
-        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 }
