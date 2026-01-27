@@ -2,12 +2,13 @@ package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.Customer;
 import com.mini_crm.main.service.CustomerService;
+import com.mini_crm.main.dto.SuccessResponse;
+import com.mini_crm.main.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -15,50 +16,81 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class CustomerController {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CustomerController.class);
+
     @Autowired
     private CustomerService customerService;
 
     // Create - POST /api/customers
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<?> createCustomer(@RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
+        logger.info("Request to create customer: {}", customerDTO);
+        Customer customer = new Customer();
+        customer.setName(customerDTO.getName());
+        customer.setPhone(customerDTO.getPhone());
+        customer.setEmail(customerDTO.getEmail());
+        customer.setCompany(customerDTO.getCompany());
+        customer.setNotes(customerDTO.getNotes());
+
+        if (customerDTO.getSaleId() != null) {
+            com.mini_crm.main.model.User sale = new com.mini_crm.main.model.User();
+            sale.setId(customerDTO.getSaleId());
+            customer.setSaleId(sale);
+        }
+
         Customer createdCustomer = customerService.createCustomer(customer);
-        return new ResponseEntity<>(createdCustomer, HttpStatus.CREATED);
+        logger.info("Customer created successfully with ID: {}", createdCustomer.getId());
+        return new ResponseEntity<>(
+                new SuccessResponse<>("Customer created successfully", HttpStatus.CREATED.value(), createdCustomer),
+                HttpStatus.CREATED);
     }
 
     // Read All - GET /api/customers
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> customers = customerService.getAllCustomers();
-        return new ResponseEntity<>(customers, HttpStatus.OK);
+    public ResponseEntity<?> getCustomers(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long saleId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        org.springframework.data.domain.Page<Customer> customers = customerService.getCustomers(search, saleId, page,
+                size, sortBy, sortDir);
+        return new ResponseEntity<>(new SuccessResponse<>(customers), HttpStatus.OK);
     }
 
     // Read by ID - GET /api/customers/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<?> getCustomerById(@PathVariable Long id) {
         Optional<Customer> customer = customerService.getCustomerById(id);
         if (customer.isPresent()) {
-            return new ResponseEntity<>(customer.get(), HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>(customer.get()), HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 
     // Update - PUT /api/customers/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
+    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
         Customer updatedCustomer = customerService.updateCustomer(id, customerDetails);
         if (updatedCustomer != null) {
-            return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>(updatedCustomer), HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 
     // Delete - DELETE /api/customers/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
         boolean deleted = customerService.deleteCustomer(id);
         if (deleted) {
-            return new ResponseEntity<>("Customer deleted successfully", HttpStatus.OK);
+            return new ResponseEntity<>(
+                    new SuccessResponse<>("Customer deleted successfully", HttpStatus.OK.value(), null),
+                    HttpStatus.OK);
         }
-        return new ResponseEntity<>("Customer not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
     }
 }

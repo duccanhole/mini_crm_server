@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -38,16 +37,24 @@ public class UserController {
         }
 
         user.setPassword(userService.hashPassword(user.getPassword()));
-        User createdUser = userService.createUser(user);
+        // User createdUser = userService.createUser(user);
         return new ResponseEntity<>(
-                new SuccessResponse<>("User created successfully", HttpStatus.CREATED.value(), createdUser),
+                new SuccessResponse<>("User created successfully", HttpStatus.CREATED.value(), null),
                 HttpStatus.CREATED);
     }
 
     // Read All - GET /api/users
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<?> getUsers(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        org.springframework.data.domain.Page<User> users = userService.getUsers(search, role, status, page, size,
+                sortBy, sortDir);
         return new ResponseEntity<>(new SuccessResponse<>(users), HttpStatus.OK);
     }
 
@@ -68,7 +75,8 @@ public class UserController {
         userDetails.setPassword(userService.hashPassword(userDetails.getPassword()));
         User updatedUser = userService.updateUser(id, userDetails);
         if (updatedUser != null) {
-            return new ResponseEntity<>(new SuccessResponse<>(updatedUser), HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessResponse<>("User updated successfully", HttpStatus.OK.value(), null),
+                    HttpStatus.OK);
         }
         return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
                 HttpStatus.NOT_FOUND);

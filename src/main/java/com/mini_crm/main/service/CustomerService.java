@@ -5,7 +5,6 @@ import com.mini_crm.main.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,9 +18,45 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    // Read all
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    // Read all with filter, sort, pagination
+    public org.springframework.data.domain.Page<Customer> getCustomers(
+            String search,
+            Long saleId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir) {
+        org.springframework.data.domain.Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? org.springframework.data.domain.Sort.by(sortBy).descending()
+                : org.springframework.data.domain.Sort.by(sortBy).ascending();
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
+                sort);
+
+        org.springframework.data.jpa.domain.Specification<Customer> spec = (root, query, criteriaBuilder) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (search != null && !search.isEmpty()) {
+                String searchLike = "%" + search.toLowerCase() + "%";
+                jakarta.persistence.criteria.Predicate namePredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("name")), searchLike);
+                jakarta.persistence.criteria.Predicate emailPredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("email")), searchLike);
+                jakarta.persistence.criteria.Predicate phonePredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("phone")), searchLike);
+                jakarta.persistence.criteria.Predicate companyPredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("company")), searchLike);
+
+                predicates.add(criteriaBuilder.or(namePredicate, emailPredicate, phonePredicate, companyPredicate));
+            }
+            if (saleId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("saleId").get("id"), saleId));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return customerRepository.findAll(spec, pageable);
     }
 
     // Read by ID
