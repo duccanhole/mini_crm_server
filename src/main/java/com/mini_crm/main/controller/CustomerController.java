@@ -24,7 +24,17 @@ public class CustomerController {
     // Create - POST /api/customers
     @PostMapping
     public ResponseEntity<?> createCustomer(@RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
-        logger.info("Request to create customer: {}", customerDTO);
+        Optional<Customer> customerByEmail = customerService.findByEmail(customerDTO.getEmail());
+        if (customerByEmail.isPresent()) {
+            return new ResponseEntity<>(new ErrorResponse("Email is already exist", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
+        Optional<Customer> customerByPhone = customerService.findByPhone(customerDTO.getPhone());
+        if (customerByPhone.isPresent()) {
+            return new ResponseEntity<>(
+                    new ErrorResponse("Phone number is already exist", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
         Customer customer = new Customer();
         customer.setName(customerDTO.getName());
         customer.setPhone(customerDTO.getPhone());
@@ -39,7 +49,6 @@ public class CustomerController {
         }
 
         Customer createdCustomer = customerService.createCustomer(customer);
-        logger.info("Customer created successfully with ID: {}", createdCustomer.getId());
         return new ResponseEntity<>(
                 new SuccessResponse<>("Customer created successfully", HttpStatus.CREATED.value(), createdCustomer),
                 HttpStatus.CREATED);
@@ -73,6 +82,17 @@ public class CustomerController {
     // Update - PUT /api/customers/{id}
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
+        Optional<Customer> customerByEmail = customerService.findByEmail(customerDetails.getEmail());
+        if (customerByEmail.isPresent()) {
+            return new ResponseEntity<>(new ErrorResponse("Email is already exist", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
+        Optional<Customer> customerByPhone = customerService.findByPhone(customerDetails.getPhone());
+        if (customerByPhone.isPresent()) {
+            return new ResponseEntity<>(
+                    new ErrorResponse("Phone number is already exist", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
         Customer updatedCustomer = customerService.updateCustomer(id, customerDetails);
         if (updatedCustomer != null) {
             return new ResponseEntity<>(new SuccessResponse<>(updatedCustomer), HttpStatus.OK);

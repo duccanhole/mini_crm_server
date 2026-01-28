@@ -6,5 +6,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long>,
-        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Customer> {
+                org.springframework.data.jpa.repository.JpaSpecificationExecutor<Customer> {
+        java.util.Optional<Customer> findByEmail(String email);
+
+        java.util.Optional<Customer> findByPhone(String phone);
 }

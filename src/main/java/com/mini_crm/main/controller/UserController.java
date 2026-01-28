@@ -72,6 +72,18 @@ public class UserController {
     // Update - PUT /api/users/{id}
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        Optional<User> userByEmail = userService.getUserByEmail(userDetails.getEmail());
+        if (userByEmail.isPresent()) {
+            return new ResponseEntity<>(
+                    new ErrorResponse("Email is already exist",
+                            HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST);
+        }
+        Optional<User> userByPhoneNumber = userService.getUserByPhoneNumber(userDetails.getPhoneNumber());
+        if (userByPhoneNumber.isPresent()) {
+            return new ResponseEntity<>(new ErrorResponse("Phone number is already exist",
+                    HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+        }
         userDetails.setPassword(userService.hashPassword(userDetails.getPassword()));
         User updatedUser = userService.updateUser(id, userDetails);
         if (updatedUser != null) {
