@@ -3,6 +3,7 @@ package com.mini_crm.main.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "leads")
@@ -12,7 +13,7 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id")
     private User customer;
 
@@ -22,16 +23,20 @@ public class Lead {
     @Column(nullable = false)
     private String status; // New, Contacted, Won, Lost
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
     @Column(name = "expected_close_date")
     private LocalDate expectedCloseDate;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by")
     private User createdBy;
+
+    // Relationship with Activity - cascade delete when Lead is deleted
+    @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Activity> activities;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

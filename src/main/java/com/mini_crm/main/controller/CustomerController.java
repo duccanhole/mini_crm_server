@@ -1,9 +1,10 @@
 package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.Customer;
+import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.CustomerService;
+import com.mini_crm.main.service.UserService;
 import com.mini_crm.main.dto.SuccessResponse;
-import com.mini_crm.main.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,19 +22,19 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    private UserService userService;
+
     // Create - POST /api/customers
     @PostMapping
     public ResponseEntity<?> createCustomer(@RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
         Optional<Customer> customerByEmail = customerService.findByEmail(customerDTO.getEmail());
         if (customerByEmail.isPresent()) {
-            return new ResponseEntity<>(new ErrorResponse("Email is already exist", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST);
+            throw new com.mini_crm.main.exception.BadRequestException("Email is already exist");
         }
         Optional<Customer> customerByPhone = customerService.findByPhone(customerDTO.getPhone());
         if (customerByPhone.isPresent()) {
-            return new ResponseEntity<>(
-                    new ErrorResponse("Phone number is already exist", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST);
+            throw new com.mini_crm.main.exception.BadRequestException("Phone number is already exist");
         }
         Customer customer = new Customer();
         customer.setName(customerDTO.getName());
@@ -43,9 +44,12 @@ public class CustomerController {
         customer.setNotes(customerDTO.getNotes());
 
         if (customerDTO.getSaleId() != null) {
-            com.mini_crm.main.model.User sale = new com.mini_crm.main.model.User();
-            sale.setId(customerDTO.getSaleId());
-            customer.setSaleId(sale);
+            Optional<User> sale = userService.getUserById(customerDTO.getSaleId());
+            if (sale.isPresent()) {
+                customer.setSale(sale.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", customerDTO.getSaleId());
+            }
         }
 
         Customer createdCustomer = customerService.createCustomer(customer);
@@ -71,46 +75,54 @@ public class CustomerController {
     // Read by ID - GET /api/customers/{id}
     @GetMapping("/{id}")
     public ResponseEntity<?> getCustomerById(@PathVariable Long id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
-        if (customer.isPresent()) {
-            return new ResponseEntity<>(new SuccessResponse<>(customer.get()), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+        Customer customer = customerService.getCustomerById(id)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id", id));
+        return new ResponseEntity<>(new SuccessResponse<>(customer), HttpStatus.OK);
     }
 
     // Update - PUT /api/customers/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
-        Optional<Customer> customerByEmail = customerService.findByEmail(customerDetails.getEmail());
-        if (customerByEmail.isPresent()) {
-            return new ResponseEntity<>(new ErrorResponse("Email is already exist", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> updateCustomer(@PathVariable Long id,
+            @RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
+        Optional<Customer> customerByEmail = customerService.findByEmail(customerDTO.getEmail());
+        if (customerByEmail.isPresent() && !customerByEmail.get().getId().equals(id)) {
+            throw new com.mini_crm.main.exception.BadRequestException("Email is already exist");
         }
-        Optional<Customer> customerByPhone = customerService.findByPhone(customerDetails.getPhone());
-        if (customerByPhone.isPresent()) {
-            return new ResponseEntity<>(
-                    new ErrorResponse("Phone number is already exist", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST);
+        Optional<Customer> customerByPhone = customerService.findByPhone(customerDTO.getPhone());
+        if (customerByPhone.isPresent() && !customerByPhone.get().getId().equals(id)) {
+            throw new com.mini_crm.main.exception.BadRequestException("Phone number is already exist");
         }
-        Customer updatedCustomer = customerService.updateCustomer(id, customerDetails);
-        if (updatedCustomer != null) {
-            return new ResponseEntity<>(new SuccessResponse<>(updatedCustomer), HttpStatus.OK);
+        Customer customer = new Customer();
+        customer.setName(customerDTO.getName());
+        customer.setPhone(customerDTO.getPhone());
+        customer.setEmail(customerDTO.getEmail());
+        customer.setCompany(customerDTO.getCompany());
+        customer.setNotes(customerDTO.getNotes());
+
+        if (customerDTO.getSaleId() != null) {
+            Optional<User> sale = userService.getUserById(customerDTO.getSaleId());
+            if (sale.isPresent()) {
+                customer.setSale(sale.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", customerDTO.getSaleId());
+            }
         }
-        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+        Customer updatedCustomer = customerService.updateCustomer(id, customer);
+        if (updatedCustomer == null) {
+            throw new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id", id);
+        }
+        return new ResponseEntity<>(new SuccessResponse<>(), HttpStatus.OK);
     }
 
     // Delete - DELETE /api/customers/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
         boolean deleted = customerService.deleteCustomer(id);
-        if (deleted) {
-            return new ResponseEntity<>(
-                    new SuccessResponse<>("Customer deleted successfully", HttpStatus.OK.value(), null),
-                    HttpStatus.OK);
+        if (!deleted) {
+            throw new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id", id);
         }
-        return new ResponseEntity<>(new ErrorResponse("Customer not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(
+                new SuccessResponse<>(),
+                HttpStatus.OK);
     }
 }

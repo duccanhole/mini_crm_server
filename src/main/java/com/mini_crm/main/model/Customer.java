@@ -28,7 +28,7 @@ public class Customer {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sale_id")
-    private User saleId;
+    private User sale;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -41,13 +41,13 @@ public class Customer {
     public Customer() {
     }
 
-    public Customer(String name, String phone, String email, String company, String notes, User saleId) {
+    public Customer(String name, String phone, String email, String company, String notes, User sale) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.company = company;
         this.notes = notes;
-        this.saleId = saleId;
+        this.sale = sale;
     }
 
     public Long getId() {
@@ -98,12 +98,12 @@ public class Customer {
         this.notes = notes;
     }
 
-    public User getSaleId() {
-        return saleId;
+    public User getSale() {
+        return sale;
     }
 
-    public void setSaleId(User saleId) {
-        this.saleId = saleId;
+    public void setSale(User sale) {
+        this.sale = sale;
     }
 
     public LocalDateTime getCreatedAt() {

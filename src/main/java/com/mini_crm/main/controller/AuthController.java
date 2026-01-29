@@ -32,7 +32,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Optional<User> user = Optional.empty();
-        
+
         // Try to find user by email
         if (loginRequest.getEmail() != null && !loginRequest.getEmail().isEmpty()) {
             user = userService.getUserByEmail(loginRequest.getEmail());
@@ -46,21 +46,17 @@ public class AuthController {
                 LoginResponse loginResponse = new LoginResponse(
                         token,
                         foundUser.getEmail(),
-                        foundUser.getRole(),
-                        "Login successful"
-                );
+                        foundUser.getRole());
                 SuccessResponse<LoginResponse> response = new SuccessResponse<>(
                         "Login successful",
                         HttpStatus.OK.value(),
-                        loginResponse
-                );
+                        loginResponse);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(
                 new ErrorResponse("Invalid credentials", HttpStatus.UNAUTHORIZED.value()),
-                HttpStatus.UNAUTHORIZED
-        );
+                HttpStatus.UNAUTHORIZED);
     }
 
     // Validate Token - GET /api/auth/validate
@@ -73,15 +69,13 @@ public class AuthController {
                 SuccessResponse<String> response = new SuccessResponse<>(
                         "Login successful",
                         HttpStatus.OK.value(),
-                        email
-                );
+                        email);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(
                 new ErrorResponse("Invalid token", HttpStatus.UNAUTHORIZED.value()),
-                HttpStatus.UNAUTHORIZED
-        );
+                HttpStatus.UNAUTHORIZED);
     }
 
     // Refresh Token - POST /api/auth/refresh
@@ -95,15 +89,13 @@ public class AuthController {
                 SuccessResponse<String> response = new SuccessResponse<>(
                         "Token refreshed successfully",
                         HttpStatus.OK.value(),
-                        newToken
-                );
+                        newToken);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(
                 new ErrorResponse("Invalid token", HttpStatus.UNAUTHORIZED.value()),
-                HttpStatus.UNAUTHORIZED
-        );
+                HttpStatus.UNAUTHORIZED);
     }
 
     // Register - POST /api/auth/register
@@ -113,38 +105,33 @@ public class AuthController {
         if (registerRequest.getName() == null || registerRequest.getName().isEmpty()) {
             return new ResponseEntity<>(
                     new ErrorResponse("Name is required", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            );
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
             return new ResponseEntity<>(
                     new ErrorResponse("Email is required", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            );
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
             return new ResponseEntity<>(
                     new ErrorResponse("Password is required", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            );
+                    HttpStatus.BAD_REQUEST);
         }
 
         // Check if passwords match
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
             return new ResponseEntity<>(
                     new ErrorResponse("Passwords do not match", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            );
+                    HttpStatus.BAD_REQUEST);
         }
 
         // Check if email already exists
         if (userService.getUserByEmail(registerRequest.getEmail()).isPresent()) {
             return new ResponseEntity<>(
                     new ErrorResponse("Email already exists", HttpStatus.CONFLICT.value()),
-                    HttpStatus.CONFLICT
-            );
+                    HttpStatus.CONFLICT);
         }
 
         // Check if phoneNumber already exists (if provided)
@@ -152,8 +139,7 @@ public class AuthController {
             if (userService.getUserByPhoneNumber(registerRequest.getphoneNumber()).isPresent()) {
                 return new ResponseEntity<>(
                         new ErrorResponse("Phone number already exists", HttpStatus.CONFLICT.value()),
-                        HttpStatus.CONFLICT
-                );
+                        HttpStatus.CONFLICT);
             }
         }
 
@@ -172,13 +158,11 @@ public class AuthController {
         RegisterResponse registerResponse = new RegisterResponse(
                 "User registered successfully",
                 createdUser.getEmail(),
-                true
-        );
+                true);
         SuccessResponse<RegisterResponse> response = new SuccessResponse<>(
                 "User registered successfully",
                 HttpStatus.CREATED.value(),
-                registerResponse
-        );
+                registerResponse);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

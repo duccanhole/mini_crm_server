@@ -50,7 +50,7 @@ public class CustomerService {
                 predicates.add(criteriaBuilder.or(namePredicate, emailPredicate, phonePredicate, companyPredicate));
             }
             if (saleId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("saleId").get("id"), saleId));
+                predicates.add(criteriaBuilder.equal(root.get("sale").get("id"), saleId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
@@ -74,7 +74,7 @@ public class CustomerService {
             customer.setEmail(customerDetails.getEmail());
             customer.setCompany(customerDetails.getCompany());
             customer.setNotes(customerDetails.getNotes());
-            customer.setSaleId(customerDetails.getSaleId());
+            customer.setSale(customerDetails.getSale());
             // CreatedAt is typically not updated
             return customerRepository.save(customer);
         }
