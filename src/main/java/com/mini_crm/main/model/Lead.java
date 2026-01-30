@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "leads")
 public class Lead {
@@ -15,7 +17,7 @@ public class Lead {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id")
-    private User customer;
+    private Customer customer;
 
     @Column(name = "\"value\"")
     private Double value;
@@ -36,6 +38,7 @@ public class Lead {
 
     // Relationship with Activity - cascade delete when Lead is deleted
     @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Activity> activities;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -58,7 +61,7 @@ public class Lead {
     public Lead() {
     }
 
-    public Lead(User customer, Double value, String status, User assignedTo, LocalDate expectedCloseDate,
+    public Lead(Customer customer, Double value, String status, User assignedTo, LocalDate expectedCloseDate,
             User createdBy) {
         this.customer = customer;
         this.value = value;
@@ -76,11 +79,11 @@ public class Lead {
         this.id = id;
     }
 
-    public User getCustomer() {
+    public Customer getCustomer() {
         return customer;
     }
 
-    public void setCustomer(User customer) {
+    public void setCustomer(Customer customer) {
         this.customer = customer;
     }
 

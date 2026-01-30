@@ -1,9 +1,13 @@
 package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.Lead;
+import com.mini_crm.main.model.Customer;
+import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.LeadService;
+import com.mini_crm.main.service.CustomerService;
+import com.mini_crm.main.service.UserService;
+import com.mini_crm.main.dto.LeadDTO;
 import com.mini_crm.main.dto.SuccessResponse;
-import com.mini_crm.main.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +23,53 @@ public class LeadController {
     @Autowired
     private LeadService leadService;
 
+    @Autowired
+    private CustomerService customerService;
+
+    @Autowired
+    private UserService userService;
+
     // Create - POST /api/leads
     @PostMapping
-    public ResponseEntity<?> createLead(@RequestBody Lead lead) {
-        try {
-            Lead createdLead = leadService.createLead(lead);
-            return new ResponseEntity<>(
-                    new SuccessResponse<>("Lead created successfully", HttpStatus.CREATED.value(), createdLead),
-                    HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("Failed to create lead: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> createLead(@RequestBody LeadDTO leadDTO) {
+        Lead lead = new Lead();
+        lead.setValue(leadDTO.getValue());
+        lead.setStatus(leadDTO.getStatus());
+        lead.setExpectedCloseDate(leadDTO.getExpectedCloseDate());
+
+        if (leadDTO.getCustomerId() != null) {
+            Optional<Customer> customer = customerService.getCustomerById(leadDTO.getCustomerId());
+            if (customer.isPresent()) {
+                lead.setCustomer(customer.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id",
+                        leadDTO.getCustomerId());
+            }
         }
+
+        if (leadDTO.getAssignedToId() != null) {
+            Optional<User> assignedTo = userService.getUserById(leadDTO.getAssignedToId());
+            if (assignedTo.isPresent()) {
+                lead.setAssignedTo(assignedTo.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
+                        leadDTO.getAssignedToId());
+            }
+        }
+
+        if (leadDTO.getCreatedById() != null) {
+            Optional<User> createdBy = userService.getUserById(leadDTO.getCreatedById());
+            if (createdBy.isPresent()) {
+                lead.setCreatedBy(createdBy.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", leadDTO.getCreatedById());
+            }
+        }
+
+        Lead createdLead = leadService.createLead(lead);
+        return new ResponseEntity<>(
+                new SuccessResponse<>("Lead created successfully", HttpStatus.CREATED.value(), createdLead),
+                HttpStatus.CREATED);
     }
 
     // Read All - GET /api/leads
@@ -51,34 +90,64 @@ public class LeadController {
     // Read by ID - GET /api/leads/{id}
     @GetMapping("/{id}")
     public ResponseEntity<?> getLeadById(@PathVariable Long id) {
-        Optional<Lead> lead = leadService.getLeadById(id);
-        if (lead.isPresent()) {
-            return new ResponseEntity<>(new SuccessResponse<>(lead.get()), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new ErrorResponse("Lead not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+        Lead lead = leadService.getLeadById(id)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id));
+        return new ResponseEntity<>(new SuccessResponse<>(lead), HttpStatus.OK);
     }
 
     // Update - PUT /api/leads/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody Lead leadDetails) {
-        Lead updatedLead = leadService.updateLead(id, leadDetails);
-        if (updatedLead != null) {
-            return new ResponseEntity<>(new SuccessResponse<>(updatedLead), HttpStatus.OK);
+    public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody LeadDTO leadDTO) {
+        Lead lead = new Lead();
+        lead.setValue(leadDTO.getValue());
+        lead.setStatus(leadDTO.getStatus());
+        lead.setExpectedCloseDate(leadDTO.getExpectedCloseDate());
+
+        if (leadDTO.getCustomerId() != null) {
+            Optional<Customer> customer = customerService.getCustomerById(leadDTO.getCustomerId());
+            if (customer.isPresent()) {
+                lead.setCustomer(customer.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id",
+                        leadDTO.getCustomerId());
+            }
         }
-        return new ResponseEntity<>(new ErrorResponse("Lead not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+
+        if (leadDTO.getAssignedToId() != null) {
+            Optional<User> assignedTo = userService.getUserById(leadDTO.getAssignedToId());
+            if (assignedTo.isPresent()) {
+                lead.setAssignedTo(assignedTo.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
+                        leadDTO.getAssignedToId());
+            }
+        }
+
+        if (leadDTO.getCreatedById() != null) {
+            Optional<User> createdBy = userService.getUserById(leadDTO.getCreatedById());
+            if (createdBy.isPresent()) {
+                lead.setCreatedBy(createdBy.get());
+            } else {
+                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", leadDTO.getCreatedById());
+            }
+        }
+
+        Lead updatedLead = leadService.updateLead(id, lead);
+        if (updatedLead == null) {
+            throw new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id);
+        }
+        return new ResponseEntity<>(new SuccessResponse<>(), HttpStatus.OK);
     }
 
     // Delete - DELETE /api/leads/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLead(@PathVariable Long id) {
         boolean deleted = leadService.deleteLead(id);
-        if (deleted) {
-            return new ResponseEntity<>(new SuccessResponse<>("Lead deleted successfully", HttpStatus.OK.value(), null),
-                    HttpStatus.OK);
+        if (!deleted) {
+            throw new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id);
         }
-        return new ResponseEntity<>(new ErrorResponse("Lead not found", HttpStatus.NOT_FOUND.value()),
-                HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(
+                new SuccessResponse<>(),
+                HttpStatus.OK);
     }
 }

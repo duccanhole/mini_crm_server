@@ -75,14 +75,14 @@ public class UserController {
         @PutMapping("/{id}")
         public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
                 Optional<User> userByEmail = userService.getUserByEmail(userDetails.getEmail());
-                if (userByEmail.isPresent()) {
+                if (userByEmail.isPresent() && !userByEmail.get().getId().equals(id)) {
                         return new ResponseEntity<>(
                                         new ErrorResponse("Email is already exist",
                                                         HttpStatus.BAD_REQUEST.value()),
                                         HttpStatus.BAD_REQUEST);
                 }
                 Optional<User> userByPhoneNumber = userService.getUserByPhoneNumber(userDetails.getPhoneNumber());
-                if (userByPhoneNumber.isPresent()) {
+                if (userByPhoneNumber.isPresent() && !userByPhoneNumber.get().getId().equals(id)) {
                         return new ResponseEntity<>(new ErrorResponse("Phone number is already exist",
                                         HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
                 }
@@ -103,7 +103,7 @@ public class UserController {
                 boolean deleted = userService.deleteUser(id);
                 if (deleted) {
                         return new ResponseEntity<>(
-                                        new SuccessResponse<>("User deleted successfully", HttpStatus.OK.value(), null),
+                                        new SuccessResponse<>(),
                                         HttpStatus.OK);
                 }
                 return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
