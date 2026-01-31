@@ -48,7 +48,7 @@ public class User {
     @JsonIgnore
     private List<Activity> activities;
 
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Notification> notifications;
 

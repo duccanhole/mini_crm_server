@@ -11,9 +11,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     @Column(nullable = false)
     private String type;
@@ -41,8 +41,8 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(User userId, String type, String title, String message, String metaData) {
-        this.userId = userId;
+    public Notification(User user, String type, String title, String message, String metaData) {
+        this.user = user;
         this.type = type;
         this.title = title;
         this.message = message;
@@ -57,12 +57,12 @@ public class Notification {
         this.id = id;
     }
 
-    public User getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(User userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getType() {

@@ -2,20 +2,32 @@ package com.mini_crm.main.service;
 
 import com.mini_crm.main.model.Customer;
 import com.mini_crm.main.repository.CustomerRepository;
+import com.mini_crm.main.dto.event.*;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class CustomerService {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     // Create
     public Customer createCustomer(Customer customer) {
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        if (savedCustomer.getSale() != null) {
+            eventPublisher.publishEvent(new CustomerCreated(savedCustomer));
+        }
+        return savedCustomer;
     }
 
     // Read all with filter, sort, pagination
@@ -69,14 +81,30 @@ public class CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(id);
         if (customerOptional.isPresent()) {
             Customer customer = customerOptional.get();
+            boolean saleChanged = false;
+            if (customer.getSale() != null && customerDetails.getSale() != null
+                    && customerDetails.getSale().getId() != customer.getSale().getId()) {
+                logger.info("Customer sale changed from {} to {}", customer.getSale().getId(),
+                        customerDetails.getSale().getId());
+                saleChanged = true;
+            } else if (customer.getSale() == null && customerDetails.getSale() != null) {
+                saleChanged = true;
+            }
+
             customer.setName(customerDetails.getName());
             customer.setPhone(customerDetails.getPhone());
             customer.setEmail(customerDetails.getEmail());
             customer.setCompany(customerDetails.getCompany());
             customer.setNotes(customerDetails.getNotes());
             customer.setSale(customerDetails.getSale());
-            // CreatedAt is typically not updated
-            return customerRepository.save(customer);
+
+            Customer savedCustomer = customerRepository.save(customer);
+
+            if (saleChanged) {
+                eventPublisher.publishEvent(new CustomerUpdated(savedCustomer));
+            }
+
+            return savedCustomer;
         }
         return null;
     }

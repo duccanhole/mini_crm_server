@@ -77,7 +77,7 @@ public class NotificationService {
 
         if (user.isPresent() && notification.isPresent()) {
             Notification notif = notification.get();
-            if (notif.getUserId().getId().equals(userId)) {
+            if (notif.getUser().getId().equals(userId)) {
                 notif.setRead(true);
                 notificationRepository.save(notif);
                 return true;
@@ -94,5 +94,15 @@ public class NotificationService {
             return true;
         }
         return false;
+    }
+
+    public void createNotification(User user, String type, String title, String message) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setRead(false);
+        notificationRepository.save(notification);
     }
 }

@@ -17,11 +17,11 @@ public interface NotificationRepository
 
     @Modifying
     @Transactional
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :user")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.user = :user")
     void markAllAsRead(User user);
 
     @Modifying
     @Transactional
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.id = :id AND n.userId = :user")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.id = :id AND n.user = :user")
     void markAsRead(Long id, User user);
 }
