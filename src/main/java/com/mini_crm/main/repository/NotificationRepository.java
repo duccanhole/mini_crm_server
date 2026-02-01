@@ -24,4 +24,8 @@ public interface NotificationRepository
     @Transactional
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.id = :id AND n.user = :user")
     void markAsRead(Long id, User user);
+
+    @Modifying
+    @Transactional
+    void deleteByCreatedAtBefore(java.time.LocalDateTime expiryDate);
 }

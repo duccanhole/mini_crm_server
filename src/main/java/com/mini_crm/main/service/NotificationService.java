@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class NotificationService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (userId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("userId").get("id"), userId));
+                predicates.add(criteriaBuilder.equal(root.get("user").get("id"), userId));
             }
             if (isRead != null) {
                 predicates.add(criteriaBuilder.equal(root.get("isRead"), isRead));
@@ -96,13 +97,20 @@ public class NotificationService {
         return false;
     }
 
-    public void createNotification(User user, String type, String title, String message) {
-        Notification notification = new Notification();
-        notification.setUser(user);
-        notification.setType(type);
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setRead(false);
-        notificationRepository.save(notification);
+    // Delete notification by ID
+    public boolean deleteNotification(Long id) {
+        Optional<Notification> notification = notificationRepository.findById(id);
+
+        if (notification.isPresent()) {
+            Notification notif = notification.get();
+            notificationRepository.delete(notif);
+            return true;
+        }
+        return false;
+    }
+
+    public void deleteOldNotifications(Integer days) {
+        LocalDateTime fiveDaysAgo = LocalDateTime.now().minusDays(days);
+        notificationRepository.deleteByCreatedAtBefore(fiveDaysAgo);
     }
 }

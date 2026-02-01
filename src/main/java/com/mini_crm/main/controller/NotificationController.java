@@ -82,4 +82,18 @@ public class NotificationController {
         return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
                 HttpStatus.NOT_FOUND);
     }
+
+    // Delete notification by ID - DELETE /api/notifications/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
+        boolean success = notificationService.deleteNotification(id);
+        if (success) {
+            return new ResponseEntity<>(
+                    new SuccessResponse<>("Notification deleted successfully", HttpStatus.OK.value(), null),
+                    HttpStatus.OK);
+        }
+        return new ResponseEntity<>(
+                new ErrorResponse("Notification not found or access denied", HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND);
+    }
 }
