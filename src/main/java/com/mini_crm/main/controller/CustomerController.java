@@ -27,7 +27,7 @@ public class CustomerController {
 
     // Create - POST /api/customers
     @PostMapping
-    public ResponseEntity<?> createCustomer(@RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
+    public ResponseEntity<?> createCustomer(@RequestBody com.mini_crm.main.dto.customer.CustomerDTO customerDTO) {
         Optional<Customer> customerByEmail = customerService.findByEmail(customerDTO.getEmail());
         if (customerByEmail.isPresent()) {
             throw new com.mini_crm.main.exception.BadRequestException("Email is already exist");
@@ -83,7 +83,7 @@ public class CustomerController {
     // Update - PUT /api/customers/{id}
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCustomer(@PathVariable Long id,
-            @RequestBody com.mini_crm.main.dto.CustomerDTO customerDTO) {
+            @RequestBody com.mini_crm.main.dto.customer.CustomerDTO customerDTO) {
         Optional<Customer> customerByEmail = customerService.findByEmail(customerDTO.getEmail());
         if (customerByEmail.isPresent() && !customerByEmail.get().getId().equals(id)) {
             throw new com.mini_crm.main.exception.BadRequestException("Email is already exist");

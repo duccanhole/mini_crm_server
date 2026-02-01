@@ -1,4 +1,4 @@
-package com.mini_crm.main.dto;
+package com.mini_crm.main.dto.activity;
 
 public class ActivityDTO {
     private String type;

@@ -1,11 +1,11 @@
 package com.mini_crm.main.controller;
 
-import com.mini_crm.main.dto.LoginRequest;
-import com.mini_crm.main.dto.LoginResponse;
-import com.mini_crm.main.dto.RegisterRequest;
-import com.mini_crm.main.dto.RegisterResponse;
+import com.mini_crm.main.dto.auth.LoginRequest;
 import com.mini_crm.main.dto.ErrorResponse;
 import com.mini_crm.main.dto.SuccessResponse;
+import com.mini_crm.main.dto.auth.LoginResponse;
+import com.mini_crm.main.dto.auth.RegisterRequest;
+import com.mini_crm.main.dto.auth.RegisterResponse;
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.UserService;
 import com.mini_crm.main.util.JwtTokenProvider;

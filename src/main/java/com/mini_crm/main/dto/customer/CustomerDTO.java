@@ -1,4 +1,4 @@
-package com.mini_crm.main.dto;
+package com.mini_crm.main.dto.customer;
 
 public class CustomerDTO {
     private String name;

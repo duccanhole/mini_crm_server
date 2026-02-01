@@ -6,8 +6,9 @@ import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.ActivityService;
 import com.mini_crm.main.service.LeadService;
 import com.mini_crm.main.service.UserService;
-import com.mini_crm.main.dto.ActivityDTO;
 import com.mini_crm.main.dto.SuccessResponse;
+import com.mini_crm.main.dto.activity.ActivityDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

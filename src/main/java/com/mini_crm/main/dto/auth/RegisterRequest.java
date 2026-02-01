@@ -1,4 +1,4 @@
-package com.mini_crm.main.dto;
+package com.mini_crm.main.dto.auth;
 
 public class RegisterRequest {
     private String name;
@@ -20,7 +20,8 @@ public class RegisterRequest {
         this.role = "user"; // Default role
     }
 
-    public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword, String role) {
+    public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword,
+            String role) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;

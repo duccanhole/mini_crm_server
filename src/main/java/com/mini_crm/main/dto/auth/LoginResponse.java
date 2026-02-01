@@ -1,4 +1,4 @@
-package com.mini_crm.main.dto;
+package com.mini_crm.main.dto.auth;
 
 public class LoginResponse {
     private String token;
