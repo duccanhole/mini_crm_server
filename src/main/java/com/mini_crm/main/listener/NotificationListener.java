@@ -5,12 +5,14 @@ import com.mini_crm.main.dto.event.CustomerCreated;
 import com.mini_crm.main.dto.event.CustomerUpdated;
 import com.mini_crm.main.dto.event.LeadCreated;
 import com.mini_crm.main.dto.event.LeadUpdated;
+import com.mini_crm.main.dto.event.NotificationCreated;
 import com.mini_crm.main.model.Customer;
 import com.mini_crm.main.model.Lead;
 import com.mini_crm.main.model.Notification;
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.model.Activity;
 import com.mini_crm.main.service.NotificationService;
+import com.mini_crm.main.service.SseService;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -26,6 +28,9 @@ public class NotificationListener {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private SseService sseService;
 
     @EventListener
     public void handleCustomerAssigned(CustomerCreated event) {
@@ -108,5 +113,12 @@ public class NotificationListener {
             notification.setMetaData(new ObjectMapper().writeValueAsString(lead));
             notificationService.createNotification(notification);
         }
+    }
+
+    @EventListener
+    public void handleNotificationCreated(NotificationCreated event) {
+        Notification notification = event.getNotification();
+        User user = notification.getUser();
+        sseService.emit(user.getId().toString(), notification);
     }
 }
