@@ -52,9 +52,8 @@ public class CustomerController {
             }
         }
 
-        Customer createdCustomer = customerService.createCustomer(customer);
         return new ResponseEntity<>(
-                new SuccessResponse<>("Customer created successfully", HttpStatus.CREATED.value(), createdCustomer),
+                new SuccessResponse<>(),
                 HttpStatus.CREATED);
     }
 
@@ -92,12 +91,18 @@ public class CustomerController {
         if (customerByPhone.isPresent() && !customerByPhone.get().getId().equals(id)) {
             throw new com.mini_crm.main.exception.BadRequestException("Phone number is already exist");
         }
-        Customer customer = new Customer();
-        customer.setName(customerDTO.getName());
-        customer.setPhone(customerDTO.getPhone());
-        customer.setEmail(customerDTO.getEmail());
-        customer.setCompany(customerDTO.getCompany());
-        customer.setNotes(customerDTO.getNotes());
+        Customer customer = customerService.getCustomerById(id)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Customer", "id", id));
+        if (customerDTO.getName() != null)
+            customer.setName(customerDTO.getName());
+        if (customerDTO.getPhone() != null)
+            customer.setPhone(customerDTO.getPhone());
+        if (customerDTO.getEmail() != null)
+            customer.setEmail(customerDTO.getEmail());
+        if (customerDTO.getCompany() != null)
+            customer.setCompany(customerDTO.getCompany());
+        if (customerDTO.getNotes() != null)
+            customer.setNotes(customerDTO.getNotes());
 
         if (customerDTO.getSaleId() != null) {
             Optional<User> sale = userService.getUserById(customerDTO.getSaleId());

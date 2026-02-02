@@ -99,10 +99,14 @@ public class LeadController {
     // Update - PUT /api/leads/{id}
     @PutMapping("/{id}")
     public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody LeadDTO leadDTO) {
-        Lead lead = new Lead();
-        lead.setValue(leadDTO.getValue());
-        lead.setStatus(leadDTO.getStatus());
-        lead.setExpectedCloseDate(leadDTO.getExpectedCloseDate());
+        Lead lead = leadService.getLeadById(id)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id));
+        if (leadDTO.getValue() != null)
+            lead.setValue(leadDTO.getValue());
+        if (leadDTO.getStatus() != null)
+            lead.setStatus(leadDTO.getStatus());
+        if (leadDTO.getExpectedCloseDate() != null)
+            lead.setExpectedCloseDate(leadDTO.getExpectedCloseDate());
 
         if (leadDTO.getCustomerId() != null) {
             Optional<Customer> customer = customerService.getCustomerById(leadDTO.getCustomerId());

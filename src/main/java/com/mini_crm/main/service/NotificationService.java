@@ -64,25 +64,18 @@ public class NotificationService {
 
     // Count unread notifications
     public long countUnread(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isPresent()) {
-            return notificationRepository.countByUserIdAndIsReadFalse(user.get());
-        }
-        return 0;
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
     // Mark single notification as read
-    public boolean markAsRead(Long id, Long userId) {
-        Optional<User> user = userRepository.findById(userId);
+    public boolean markAsRead(Long id) {
         Optional<Notification> notification = notificationRepository.findById(id);
 
-        if (user.isPresent() && notification.isPresent()) {
+        if (notification.isPresent()) {
             Notification notif = notification.get();
-            if (notif.getUser().getId().equals(userId)) {
-                notif.setRead(true);
-                notificationRepository.save(notif);
-                return true;
-            }
+            notif.setRead(true);
+            notificationRepository.save(notif);
+            return true;
         }
         return false;
     }

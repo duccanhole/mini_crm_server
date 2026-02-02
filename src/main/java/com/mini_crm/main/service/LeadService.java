@@ -1,8 +1,12 @@
 package com.mini_crm.main.service;
 
+import com.mini_crm.main.dto.event.LeadCreated;
+import com.mini_crm.main.dto.event.LeadUpdated;
 import com.mini_crm.main.model.Lead;
 import com.mini_crm.main.repository.LeadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,9 +17,16 @@ public class LeadService {
     @Autowired
     private LeadRepository leadRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     // Create
     public Lead createLead(Lead lead) {
-        return leadRepository.save(lead);
+        Lead newLead = leadRepository.save(lead);
+        if (newLead.getAssignedTo().getId() != null) {
+            eventPublisher.publishEvent(new LeadCreated(newLead));
+        }
+        return lead;
     }
 
     // Read all with filter, sort, pagination
@@ -71,7 +82,11 @@ public class LeadService {
             existingLead.setCreatedBy(leadDetails.getCreatedBy());
             // createdAt is not updated
             // updatedAt is handled by @PreUpdate in Model
-            return leadRepository.save(existingLead);
+            Lead leadSave = leadRepository.save(existingLead);
+            if (leadSave.getCreatedBy().getId() != null) {
+                eventPublisher.publishEvent(new LeadUpdated(leadSave));
+            }
+            return leadSave;
         }
         return null; // Or throw exception
     }

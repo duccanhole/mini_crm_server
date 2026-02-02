@@ -1,10 +1,14 @@
 package com.mini_crm.main.listener;
 
+import com.mini_crm.main.dto.event.ActivityCreated;
 import com.mini_crm.main.dto.event.CustomerCreated;
 import com.mini_crm.main.dto.event.CustomerUpdated;
+import com.mini_crm.main.dto.event.LeadCreated;
+import com.mini_crm.main.dto.event.LeadUpdated;
 import com.mini_crm.main.model.Customer;
 import com.mini_crm.main.model.Lead;
 import com.mini_crm.main.model.Notification;
+import com.mini_crm.main.model.User;
 import com.mini_crm.main.model.Activity;
 import com.mini_crm.main.service.NotificationService;
 
@@ -33,7 +37,7 @@ public class NotificationListener {
         notification.setTitle("Customer assigned");
         notification.setMessage("You have been assigned a new customer");
         notification.setRead(false);
-        notification.setMetaData(customer.toString());
+        notification.setMetaData(new ObjectMapper().writeValueAsString(customer));
         notificationService.createNotification(notification);
     }
 
@@ -43,27 +47,66 @@ public class NotificationListener {
         logger.info("Customer updated: {}", customer);
         Notification notification = new Notification();
         notification.setUser(customer.getSale());
-        notification.setType("CUSTOMER_UPDATED");
-        notification.setTitle("Customer updated");
-        notification.setMessage("You have been updated a customer");
+        notification.setType("CUSTOMER_ASSIGNED");
+        notification.setTitle("Customer assigned");
+        notification.setMessage("You have been assigned a new customer");
         notification.setRead(false);
 
         notification.setMetaData(new ObjectMapper().writeValueAsString(customer));
         notificationService.createNotification(notification);
     }
 
-    @org.springframework.transaction.event.TransactionalEventListener
-    public void handleActivityCreated(Activity activity) {
+    @EventListener
+    public void handleActivityCreated(ActivityCreated event) {
+        Activity activity = event.getActivity();
+        logger.info("Listent activity created: {}", activity);
+        Lead lead = activity.getLead();
+        User createdBy = lead.getCreatedBy();
+        if (createdBy.getRole().equals("manager") || createdBy.getRole().equals("admin")) {
+            Notification notification = new Notification();
+            notification.setUser(createdBy);
+            notification.setType("ACTIVITY_CREATED");
+            notification.setTitle("Activity created");
+            notification.setMessage("Lead has been updated activity");
+            notification.setRead(false);
 
+            notification.setMetaData(new ObjectMapper().writeValueAsString(activity));
+            notificationService.createNotification(notification);
+        }
     }
 
     @EventListener
-    public void handleLeadCreated(Lead lead) {
+    public void handleLeadCreated(LeadCreated event) {
+        Lead lead = event.getLead();
+        User createdBy = lead.getCreatedBy();
+        User sale = lead.getAssignedTo();
+        if (createdBy.getId() != sale.getId()) {
+            Notification notification = new Notification();
+            notification.setUser(sale);
+            notification.setType("LEAD_CREATED");
+            notification.setTitle("Lead created");
+            notification.setMessage("You have been assigned a new lead");
+            notification.setRead(false);
 
+            notification.setMetaData(new ObjectMapper().writeValueAsString(lead));
+            notificationService.createNotification(notification);
+        }
     }
 
     @EventListener
-    public void handleLeadUpdated(Lead lead) {
+    public void handleLeadUpdated(LeadUpdated event) {
+        Lead lead = event.getLead();
+        User createdBy = lead.getCreatedBy();
+        if (createdBy.getRole().equals("manager") || createdBy.getRole().equals("admin")) {
+            Notification notification = new Notification();
+            notification.setUser(createdBy);
+            notification.setType("LEAD_UPDATED");
+            notification.setTitle("Lead updated");
+            notification.setMessage("Lead has been updated");
+            notification.setRead(false);
 
+            notification.setMetaData(new ObjectMapper().writeValueAsString(lead));
+            notificationService.createNotification(notification);
+        }
     }
 }

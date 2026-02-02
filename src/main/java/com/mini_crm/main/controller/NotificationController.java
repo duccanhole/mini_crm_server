@@ -39,7 +39,7 @@ public class NotificationController {
     // Get Notifications by User ID - GET /api/notifications
     @GetMapping
     public ResponseEntity<?> getNotifications(
-            @RequestParam Long userId,
+            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) Boolean isRead,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -59,8 +59,8 @@ public class NotificationController {
 
     // Mark as Read (Single) - PUT /api/notifications/{id}/read
     @PutMapping("/{id}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable Long id, @RequestParam Long userId) {
-        boolean success = notificationService.markAsRead(id, userId);
+    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
+        boolean success = notificationService.markAsRead(id);
         if (success) {
             return new ResponseEntity<>(
                     new SuccessResponse<>("Notification marked as read", HttpStatus.OK.value(), null), HttpStatus.OK);
@@ -89,7 +89,7 @@ public class NotificationController {
         boolean success = notificationService.deleteNotification(id);
         if (success) {
             return new ResponseEntity<>(
-                    new SuccessResponse<>("Notification deleted successfully", HttpStatus.OK.value(), null),
+                    new SuccessResponse<>(),
                     HttpStatus.OK);
         }
         return new ResponseEntity<>(

@@ -87,9 +87,12 @@ public class ActivityController {
     // Update - PUT /api/activities/{id}
     @PutMapping("/{id}")
     public ResponseEntity<?> updateActivity(@PathVariable Long id, @RequestBody ActivityDTO activityDTO) {
-        Activity activity = new Activity();
-        activity.setType(activityDTO.getType());
-        activity.setDescription(activityDTO.getDescription());
+        Activity activity = activityService.getActivityById(id)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Activity", "id", id));
+        if (activityDTO.getType() != null)
+            activity.setType(activityDTO.getType());
+        if (activityDTO.getDescription() != null)
+            activity.setDescription(activityDTO.getDescription());
 
         if (activityDTO.getLeadId() != null) {
             Optional<Lead> lead = leadService.getLeadById(activityDTO.getLeadId());

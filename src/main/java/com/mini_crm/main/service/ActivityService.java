@@ -1,8 +1,13 @@
 package com.mini_crm.main.service;
 
+import com.mini_crm.main.dto.event.ActivityCreated;
 import com.mini_crm.main.model.Activity;
 import com.mini_crm.main.repository.ActivityRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +23,22 @@ import java.util.Optional;
 @Service
 public class ActivityService {
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ActivityRepository activityRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     // Create
     public Activity createActivity(Activity activity) {
-        return activityRepository.save(activity);
+        Activity newActivity = activityRepository.save(activity);
+        if (newActivity.getCreatedBy().getId() != null) {
+            logger.info("Activity created: {}", newActivity);
+            eventPublisher.publishEvent(new ActivityCreated(newActivity));
+        }
+        return newActivity;
     }
 
     // Read all with filter, sort, pagination
@@ -70,7 +85,8 @@ public class ActivityService {
             existingActivity.setDescription(activityDetails.getDescription());
             existingActivity.setLead(activityDetails.getLead());
             existingActivity.setCreatedBy(activityDetails.getCreatedBy());
-            return activityRepository.save(existingActivity);
+            Activity activitySave = activityRepository.save(existingActivity);
+            return activitySave;
         }
         return null; // Or throw exception
     }

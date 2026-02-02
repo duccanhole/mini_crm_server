@@ -96,16 +96,23 @@ public class UserController {
                         return new ResponseEntity<>(new ErrorResponse("Phone number is already exist",
                                         HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
                 }
-                User user = new User();
-                user.setName(userUpdate.getName());
-                user.setEmail(userUpdate.getEmail());
-                user.setPhoneNumber(userUpdate.getPhoneNumber());
-                user.setStatus(userUpdate.getStatus());
-                user.setRole(userUpdate.getRole());
+                User user = userService.getUserById(id)
+                                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("User",
+                                                "id", id));
+                if (userUpdate.getName() != null)
+                        user.setName(userUpdate.getName());
+                if (userUpdate.getEmail() != null)
+                        user.setEmail(userUpdate.getEmail());
+                if (userUpdate.getPhoneNumber() != null)
+                        user.setPhoneNumber(userUpdate.getPhoneNumber());
+                if (userUpdate.getStatus() != null)
+                        user.setStatus(userUpdate.getStatus());
+                if (userUpdate.getRole() != null)
+                        user.setRole(userUpdate.getRole());
                 User updatedUser = userService.updateUser(id, user);
                 if (updatedUser != null) {
                         return new ResponseEntity<>(
-                                        new SuccessResponse<>("User updated successfully", HttpStatus.OK.value(), null),
+                                        new SuccessResponse<>(),
                                         HttpStatus.OK);
                 }
                 return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
@@ -132,8 +139,7 @@ public class UserController {
                 User updatedUser = userService.updateUser(id, user.get());
                 if (updatedUser != null) {
                         return new ResponseEntity<>(
-                                        new SuccessResponse<>("Password changed successfully", HttpStatus.OK.value(),
-                                                        null),
+                                        new SuccessResponse<>(),
                                         HttpStatus.OK);
                 }
                 return new ResponseEntity<>(new ErrorResponse("Password not changed", HttpStatus.NOT_FOUND.value()),

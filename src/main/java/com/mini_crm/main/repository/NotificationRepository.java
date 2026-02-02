@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface NotificationRepository
         extends JpaRepository<Notification, Long>, JpaSpecificationExecutor<Notification> {
 
-    long countByUserIdAndIsReadFalse(User user);
+    long countByUserIdAndIsReadFalse(Long userId);
 
     @Modifying
     @Transactional
