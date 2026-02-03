@@ -1,8 +1,11 @@
 package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.Notification;
+import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.NotificationService;
+import com.mini_crm.main.service.UserService;
 import com.mini_crm.main.dto.SuccessResponse;
+import com.mini_crm.main.dto.notification.NotificationDTO;
 import com.mini_crm.main.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -20,11 +24,28 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private UserService userService;
+
     // Create - POST /api/notifications (Optional, mostly for testing or internal
     // use)
     @PostMapping
-    public ResponseEntity<?> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<?> createNotification(@RequestBody NotificationDTO notificationDTO) {
         try {
+            Optional<User> user = userService.getUserById(notificationDTO.getUserId());
+            if (user == null) {
+                return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                        HttpStatus.NOT_FOUND);
+            }
+            Notification notification = new Notification();
+            notification.setUser(user.get());
+            notification.setType(notificationDTO.getType());
+            notification.setTitle(notificationDTO.getTitle());
+            notification.setMessage(notificationDTO.getMessage());
+            if (notificationDTO.getMetaData() != null) {
+                notification.setMetaData(notificationDTO.getMetaData());
+            }
+            notification.setRead(false);
             Notification createdNotification = notificationService.createNotification(notification);
             return new ResponseEntity<>(
                     new SuccessResponse<>("Notification created successfully", HttpStatus.CREATED.value(),

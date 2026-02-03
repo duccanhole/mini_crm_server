@@ -8,19 +8,18 @@ public class LeadDTO {
     private String status;
     private Long assignedToId;
     private LocalDate expectedCloseDate;
-    private Long createdById;
+    // private Long createdById;
 
     public LeadDTO() {
     }
 
-    public LeadDTO(Long customerId, Double value, String status, Long assignedToId, LocalDate expectedCloseDate,
-            Long createdById) {
+    public LeadDTO(Long customerId, Double value, String status, Long assignedToId, LocalDate expectedCloseDate) {
         this.customerId = customerId;
         this.value = value;
         this.status = status;
         this.assignedToId = assignedToId;
         this.expectedCloseDate = expectedCloseDate;
-        this.createdById = createdById;
+        // this.createdById = createdById;
     }
 
     public Long getCustomerId() {
@@ -63,14 +62,6 @@ public class LeadDTO {
         this.expectedCloseDate = expectedCloseDate;
     }
 
-    public Long getCreatedById() {
-        return createdById;
-    }
-
-    public void setCreatedById(Long createdById) {
-        this.createdById = createdById;
-    }
-
     @Override
     public String toString() {
         return "LeadDTO{" +
@@ -79,7 +70,6 @@ public class LeadDTO {
                 ", status='" + status + '\'' +
                 ", assignedToId=" + assignedToId +
                 ", expectedCloseDate=" + expectedCloseDate +
-                ", createdById=" + createdById +
                 '}';
     }
 }

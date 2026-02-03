@@ -1,10 +1,12 @@
 package com.mini_crm.main.service;
 
+import com.mini_crm.main.dto.event.NotificationCreated;
 import com.mini_crm.main.model.Notification;
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.repository.NotificationRepository;
 import com.mini_crm.main.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +29,14 @@ public class NotificationService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     // Create
     public Notification createNotification(Notification notification) {
-        return notificationRepository.save(notification);
+        Notification newNotification = notificationRepository.save(notification);
+        eventPublisher.publishEvent(new NotificationCreated(newNotification));
+        return newNotification;
     }
 
     // Get notifications by userId with pagination

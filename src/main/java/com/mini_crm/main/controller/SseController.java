@@ -18,7 +18,7 @@ public class SseController {
     @Autowired
     private SseService sseService;
 
-    @GetMapping("/{userId}/subscribe")
+    @GetMapping(value = "/{userId}/subscribe", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter handleSse(@PathVariable Long userId) {
         return sseService.subscribe(userId);
     }

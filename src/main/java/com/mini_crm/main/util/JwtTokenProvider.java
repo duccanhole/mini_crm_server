@@ -55,6 +55,9 @@ public class JwtTokenProvider {
 
     // Get email from JWT Token
     public String getEmailFromToken(String token) {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()

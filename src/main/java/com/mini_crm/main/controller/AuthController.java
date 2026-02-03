@@ -10,16 +10,38 @@ import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.UserService;
 import com.mini_crm.main.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    @Value("${admin.phone}")
+    private String adminPhone;
+
+    @Value("${manager.email}")
+    private String managerEmail;
+
+    @Value("${manager.phone}")
+    private String managerPhone;
+
+    @Value("${sale.email}")
+    private String saleEmail;
+
+    @Value("${sale.phone}")
+    private String salePhone;
+
+    @Value("${password.default}")
+    private String defaultPassword;
 
     @Autowired
     private UserService userService;
@@ -85,6 +107,12 @@ public class AuthController {
             String jwtToken = token.substring(7);
             if (jwtTokenProvider.validateToken(jwtToken)) {
                 String email = jwtTokenProvider.getEmailFromToken(jwtToken);
+                Optional<User> user = userService.getUserByEmail(email);
+                if (!user.isPresent()) {
+                    return new ResponseEntity<>(
+                            new ErrorResponse("User not found", HttpStatus.UNAUTHORIZED.value()),
+                            HttpStatus.UNAUTHORIZED);
+                }
                 String newToken = jwtTokenProvider.generateToken(email);
                 SuccessResponse<String> response = new SuccessResponse<>(
                         "Token refreshed successfully",
@@ -165,5 +193,47 @@ public class AuthController {
                 registerResponse);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/set-default-account")
+    public ResponseEntity<?> setDefaultAccount() {
+        Optional<User> adminUser = userService.getUserByEmail(adminEmail);
+        Optional<User> managerUser = userService.getUserByEmail(managerEmail);
+        Optional<User> saleUser = userService.getUserByEmail(saleEmail);
+
+        if (!adminUser.isPresent()) {
+            User admin = new User();
+            admin.setName("Admin");
+            admin.setEmail(adminEmail);
+            admin.setPhoneNumber(adminPhone);
+            admin.setPassword(userService.hashPassword(defaultPassword));
+            admin.setStatus("active");
+            admin.setRole("admin");
+            userService.createUser(admin);
+        }
+
+        if (!managerUser.isPresent()) {
+            User manager = new User();
+            manager.setName("Manager");
+            manager.setEmail(managerEmail);
+            manager.setPhoneNumber(managerPhone);
+            manager.setPassword(userService.hashPassword(defaultPassword));
+            manager.setStatus("active");
+            manager.setRole("manager");
+            userService.createUser(manager);
+        }
+
+        if (!saleUser.isPresent()) {
+            User sale = new User();
+            sale.setName("Sale");
+            sale.setEmail(saleEmail);
+            sale.setPhoneNumber(salePhone);
+            sale.setPassword(userService.hashPassword(defaultPassword));
+            sale.setStatus("active");
+            sale.setRole("sale");
+            userService.createUser(sale);
+        }
+
+        return new ResponseEntity<>(new SuccessResponse<>(), HttpStatus.OK);
     }
 }

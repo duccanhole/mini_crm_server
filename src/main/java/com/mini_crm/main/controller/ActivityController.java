@@ -6,6 +6,7 @@ import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.ActivityService;
 import com.mini_crm.main.service.LeadService;
 import com.mini_crm.main.service.UserService;
+import com.mini_crm.main.util.JwtTokenProvider;
 import com.mini_crm.main.dto.SuccessResponse;
 import com.mini_crm.main.dto.activity.ActivityDTO;
 
@@ -31,9 +32,13 @@ public class ActivityController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     // Create - POST /api/activities
     @PostMapping
-    public ResponseEntity<?> createActivity(@RequestBody ActivityDTO activityDTO) {
+    public ResponseEntity<?> createActivity(@RequestBody ActivityDTO activityDTO,
+            @RequestHeader("Authorization") String token) {
         Activity activity = new Activity();
         activity.setType(activityDTO.getType());
         activity.setDescription(activityDTO.getDescription());
@@ -47,15 +52,21 @@ public class ActivityController {
             }
         }
 
-        if (activityDTO.getCreatedById() != null) {
-            Optional<User> createdBy = userService.getUserById(activityDTO.getCreatedById());
-            if (createdBy.isPresent()) {
-                activity.setCreatedBy(createdBy.get());
-            } else {
-                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
-                        activityDTO.getCreatedById());
-            }
-        }
+        // if (activityDTO.getCreatedById() != null) {
+        // Optional<User> createdBy =
+        // userService.getUserById(activityDTO.getCreatedById());
+        // if (createdBy.isPresent()) {
+        // activity.setCreatedBy(createdBy.get());
+        // } else {
+        // throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
+        // activityDTO.getCreatedById());
+        // }
+        // }
+
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("User", "email", email));
+        activity.setCreatedBy(user);
 
         Activity createdActivity = activityService.createActivity(activity);
         return new ResponseEntity<>(
@@ -100,16 +111,6 @@ public class ActivityController {
                 activity.setLead(lead.get());
             } else {
                 throw new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", activityDTO.getLeadId());
-            }
-        }
-
-        if (activityDTO.getCreatedById() != null) {
-            Optional<User> createdBy = userService.getUserById(activityDTO.getCreatedById());
-            if (createdBy.isPresent()) {
-                activity.setCreatedBy(createdBy.get());
-            } else {
-                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
-                        activityDTO.getCreatedById());
             }
         }
 

@@ -6,20 +6,25 @@ import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.LeadService;
 import com.mini_crm.main.service.CustomerService;
 import com.mini_crm.main.service.UserService;
+import com.mini_crm.main.util.JwtTokenProvider;
 import com.mini_crm.main.dto.SuccessResponse;
 import com.mini_crm.main.dto.lead.LeadDTO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/leads")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class LeadController {
+    private static final Logger logger = LoggerFactory.getLogger(LeadController.class);
 
     @Autowired
     private LeadService leadService;
@@ -30,9 +35,12 @@ public class LeadController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     // Create - POST /api/leads
     @PostMapping
-    public ResponseEntity<?> createLead(@RequestBody LeadDTO leadDTO) {
+    public ResponseEntity<?> createLead(@RequestBody LeadDTO leadDTO, @RequestHeader("Authorization") String token) {
         Lead lead = new Lead();
         lead.setValue(leadDTO.getValue());
         lead.setStatus(leadDTO.getStatus());
@@ -58,14 +66,10 @@ public class LeadController {
             }
         }
 
-        if (leadDTO.getCreatedById() != null) {
-            Optional<User> createdBy = userService.getUserById(leadDTO.getCreatedById());
-            if (createdBy.isPresent()) {
-                lead.setCreatedBy(createdBy.get());
-            } else {
-                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", leadDTO.getCreatedById());
-            }
-        }
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("User", "email", email));
+        lead.setCreatedBy(user);
 
         Lead createdLead = leadService.createLead(lead);
         return new ResponseEntity<>(
@@ -125,15 +129,6 @@ public class LeadController {
             } else {
                 throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id",
                         leadDTO.getAssignedToId());
-            }
-        }
-
-        if (leadDTO.getCreatedById() != null) {
-            Optional<User> createdBy = userService.getUserById(leadDTO.getCreatedById());
-            if (createdBy.isPresent()) {
-                lead.setCreatedBy(createdBy.get());
-            } else {
-                throw new com.mini_crm.main.exception.ResourceNotFoundException("User", "id", leadDTO.getCreatedById());
             }
         }
 

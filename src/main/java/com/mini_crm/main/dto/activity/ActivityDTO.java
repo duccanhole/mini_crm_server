@@ -4,16 +4,14 @@ public class ActivityDTO {
     private String type;
     private String description;
     private Long leadId;
-    private Long createdById;
 
     public ActivityDTO() {
     }
 
-    public ActivityDTO(String type, String description, Long leadId, Long createdById) {
+    public ActivityDTO(String type, String description, Long leadId) {
         this.type = type;
         this.description = description;
         this.leadId = leadId;
-        this.createdById = createdById;
     }
 
     public String getType() {
@@ -40,21 +38,12 @@ public class ActivityDTO {
         this.leadId = leadId;
     }
 
-    public Long getCreatedById() {
-        return createdById;
-    }
-
-    public void setCreatedById(Long createdById) {
-        this.createdById = createdById;
-    }
-
     @Override
     public String toString() {
         return "ActivityDTO{" +
                 "type='" + type + '\'' +
                 ", description='" + description + '\'' +
                 ", leadId=" + leadId +
-                ", createdById=" + createdById +
                 '}';
     }
 }

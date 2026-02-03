@@ -2,13 +2,17 @@ package com.mini_crm.main.controller;
 
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.UserService;
+import com.mini_crm.main.util.JwtTokenProvider;
 import com.mini_crm.main.dto.SuccessResponse;
 import com.mini_crm.main.dto.user.UserChangePassword;
 import com.mini_crm.main.dto.user.UserCreate;
 import com.mini_crm.main.dto.user.UserUpdate;
 import com.mini_crm.main.dto.ErrorResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +23,15 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class UserController {
+        private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+        @Value("${password.default}")
+        private String defaultPassword;
 
         @Autowired
         private UserService userService;
+
+        @Autowired
+        private JwtTokenProvider jwtTokenProvider;
 
         // Create - POST /api/users
         @PostMapping
@@ -122,7 +132,18 @@ public class UserController {
         // Change Password - PUT /api/users/{id}/change-password
         @PutMapping("/{id}/change-password")
         public ResponseEntity<?> changePassword(@PathVariable Long id,
-                        @RequestBody UserChangePassword userChangePassword) {
+                        @RequestBody UserChangePassword userChangePassword,
+                        @RequestHeader("Authorization") String token) {
+                String email = jwtTokenProvider.getEmailFromToken(token);
+                Optional<User> requester = userService.getUserByEmail(email);
+                if (requester.isPresent() && !requester.get().getId().equals(id)) {
+                        return new ResponseEntity<>(new ErrorResponse("You have no permission",
+                                        HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
+                }
+                if (!requester.isPresent()) {
+                        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                                        HttpStatus.NOT_FOUND);
+                }
                 Optional<User> user = userService.getUserById(id);
                 if (!user.isPresent()) {
                         return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
@@ -135,7 +156,35 @@ public class UserController {
                                         HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
                 }
 
-                user.get().setPassword(newPassword);
+                user.get().setPassword(userService.hashPassword(newPassword));
+                User updatedUser = userService.updateUser(id, user.get());
+                if (updatedUser != null) {
+                        return new ResponseEntity<>(
+                                        new SuccessResponse<>(),
+                                        HttpStatus.OK);
+                }
+                return new ResponseEntity<>(new ErrorResponse("Password not changed", HttpStatus.NOT_FOUND.value()),
+                                HttpStatus.NOT_FOUND);
+        }
+
+        @PutMapping("/{id}/reset-password")
+        public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+                String emailFromToken = jwtTokenProvider.getEmailFromToken(token);
+                Optional<User> requester = userService.getUserByEmail(emailFromToken);
+                if (requester.isPresent() && !requester.get().getRole().equals("admin")) {
+                        return new ResponseEntity<>(new ErrorResponse("You have no permission",
+                                        HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
+                }
+                if (!requester.isPresent()) {
+                        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                                        HttpStatus.NOT_FOUND);
+                }
+                Optional<User> user = userService.getUserById(id);
+                if (!user.isPresent()) {
+                        return new ResponseEntity<>(new ErrorResponse("User not found", HttpStatus.NOT_FOUND.value()),
+                                        HttpStatus.NOT_FOUND);
+                }
+                user.get().setPassword(userService.hashPassword(defaultPassword));
                 User updatedUser = userService.updateUser(id, user.get());
                 if (updatedUser != null) {
                         return new ResponseEntity<>(
