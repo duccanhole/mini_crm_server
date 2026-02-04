@@ -1,0 +1,9 @@
+target/
+*.jar
+.git/
+.mvn/
+mvnw
+mvnw.cmd
+.vscode/
+HELP.md
+application-local.properties

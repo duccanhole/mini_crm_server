@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mini-crm-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mini_crm}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # No default for security
+    networks:
+      - backend-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: mini-crm-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/${DB_NAME:-mini_crm}
+    networks:
+      - backend-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
