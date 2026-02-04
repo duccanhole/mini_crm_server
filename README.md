@@ -70,20 +70,6 @@ src/main/java/com/mini_crm/main/
 └── exception/    # Global Exception Handling & Error Mapping
 ```
 
-## 🧠 Key Technical Challenges & Solutions
-
-### 1. Real-time Synchronization (SSE)
-**Challenge:** Standard REST is stateless and doesn't support server-to-client pushes, which is critical for CRM notifications.
-**Solution:** Implemented **Server-Sent Events (SSE)**. Unlike WebSockets, SSE is lighter and operates over standard HTTP, making it easier to scale and maintain. I implemented a robust `SseService` to manage active emitters and handle connection timeouts gracefully.
-
-### 2. DevOps & Secure Deployment
-**Challenge:** Managing sensitive credentials and ensuring a consistent build environment across different machines.
-**Solution:** Optimized a **multi-stage Docker build** using **Java 25**. This reduced the final image size by ~60% by separating the build environment from the runtime environment (JRE). All sensitive data is managed via environment variables and `.env` files, ensuring no secrets are baked into the image layers.
-
-### 3. Data Integrity & Lifecycle
-**Challenge:** Ensuring smooth transitions between Leads and Customers while maintaining activity history.
-**Solution:** Leveraged JPA transactions and soft-relationship mapping to ensure that when a Lead is converted or an activity is logged, the data remains consistent across the PostgreSQL schema.
-
 ## 🗄️ Database Schema Overview
 *   **Users:** Manages authentication, roles (Admin, Manager, Sale), and profile data.
 *   **Leads:** Captures potential client info and status lifecycle.
@@ -108,7 +94,7 @@ src/main/java/com/mini_crm/main/
 
 ### Standard Run
 1. Ensure a PostgreSQL instance is running.
-2. Update `src/main/resources/application-local.properties` with your database credentials.
+2. Add `application-local.properties` to the root directory follow `application-local-example.properties` template.
 3. Run the application:
    ```bash
    mvn spring-boot:run
