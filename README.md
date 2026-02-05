@@ -31,7 +31,7 @@ The application follows a **Layered Architecture (N-Tier)** approach to ensure s
 *   **Lead & Customer Management:** Full CRUD operations with status tracking and lifecycle transitions.
 *   **Activity Tracking:** Logging of meetings, calls, and follow-ups associated with leads and customers.
 *   **Role-Based Access Control (RBAC):** Secure access managed for Admin, Manager, and Sale roles.
-*   **Automated Scheduling:** Background tasks for data maintenance (e.g., auto-deletion of old notifications).
+*   **Automated Scheduling:** Background engine for recurring maintenance tasks and automated business logic execution.
 *   **Real-time Notifications:** Instant UI updates for critical business events.
 
 ## 📡 API Overview
@@ -45,7 +45,7 @@ The application follows a **Layered Architecture (N-Tier)** approach to ensure s
 ## 🔔 Real-time Notification (SSE)
 The system utilizes **Server-Sent Events (SSE)** to push notifications to the frontend in real-time.
 *   **Efficiency:** Unlike WebSockets, SSE is a lightweight, unidirectional protocol that works over standard HTTP.
-*   **Mechanism:** When a significant event occurs (e.g., a new lead is assigned), the `SseService` pushes a payload to the user's active connection.
+*   **Mechanism:** Notifications are triggered by real-time user interactions or background system schedules to ensure proactive engagement.
 *   **Resilience:** The implementation handles connection drops and ensures that the client remains synchronized with the latest updates without manual polling.
 
 ## 🔐 Authentication Flow (JWT)

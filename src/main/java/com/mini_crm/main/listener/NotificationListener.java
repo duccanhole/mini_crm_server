@@ -2,7 +2,7 @@ package com.mini_crm.main.listener;
 
 import com.mini_crm.main.dto.event.ActivityCreated;
 import com.mini_crm.main.dto.event.CustomerCreated;
-import com.mini_crm.main.dto.event.CustomerUpdated;
+import com.mini_crm.main.dto.event.CustomerAssigned;
 import com.mini_crm.main.dto.event.LeadCreated;
 import com.mini_crm.main.dto.event.LeadUpdated;
 import com.mini_crm.main.dto.event.NotificationCreated;
@@ -47,9 +47,9 @@ public class NotificationListener {
     }
 
     @EventListener
-    public void handleCustomerUpdated(CustomerUpdated event) {
+    public void handleCustomerAssigned(CustomerAssigned event) {
         Customer customer = event.getCustomer();
-        logger.info("Customer updated: {}", customer);
+        logger.info("Customer assigned: {}", customer);
         Notification notification = new Notification();
         notification.setUser(customer.getSale());
         notification.setType("CUSTOMER_ASSIGNED");
@@ -102,7 +102,8 @@ public class NotificationListener {
     public void handleLeadUpdated(LeadUpdated event) {
         Lead lead = event.getLead();
         User createdBy = lead.getCreatedBy();
-        if (createdBy.getRole().equals("manager") || createdBy.getRole().equals("admin")) {
+        User updatedBy = event.getUpdatedBy();
+        if (createdBy.getId() != updatedBy.getId()) {
             Notification notification = new Notification();
             notification.setUser(createdBy);
             notification.setType("LEAD_UPDATED");

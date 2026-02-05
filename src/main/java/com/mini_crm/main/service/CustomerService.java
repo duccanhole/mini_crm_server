@@ -101,7 +101,7 @@ public class CustomerService {
             Customer savedCustomer = customerRepository.save(customer);
 
             if (saleChanged) {
-                eventPublisher.publishEvent(new CustomerUpdated(savedCustomer));
+                eventPublisher.publishEvent(new CustomerAssigned(savedCustomer));
             }
 
             return savedCustomer;

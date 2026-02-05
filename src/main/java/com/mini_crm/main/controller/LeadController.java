@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -102,7 +101,8 @@ public class LeadController {
 
     // Update - PUT /api/leads/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody LeadDTO leadDTO) {
+    public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody LeadDTO leadDTO,
+            @RequestHeader("Authorization") String token) {
         Lead lead = leadService.getLeadById(id)
                 .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id));
         if (leadDTO.getValue() != null)
@@ -132,7 +132,10 @@ public class LeadController {
             }
         }
 
-        Lead updatedLead = leadService.updateLead(id, lead);
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new com.mini_crm.main.exception.ResourceNotFoundException("User", "email", email));
+        Lead updatedLead = leadService.updateLead(id, lead, user);
         if (updatedLead == null) {
             throw new com.mini_crm.main.exception.ResourceNotFoundException("Lead", "id", id);
         }

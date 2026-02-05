@@ -1,19 +1,19 @@
 package com.mini_crm.main.dto.lead;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class LeadDTO {
     private Long customerId;
     private Double value;
     private String status;
     private Long assignedToId;
-    private LocalDate expectedCloseDate;
+    private LocalDateTime expectedCloseDate;
     // private Long createdById;
 
     public LeadDTO() {
     }
 
-    public LeadDTO(Long customerId, Double value, String status, Long assignedToId, LocalDate expectedCloseDate) {
+    public LeadDTO(Long customerId, Double value, String status, Long assignedToId, LocalDateTime expectedCloseDate) {
         this.customerId = customerId;
         this.value = value;
         this.status = status;
@@ -54,11 +54,11 @@ public class LeadDTO {
         this.assignedToId = assignedToId;
     }
 
-    public LocalDate getExpectedCloseDate() {
+    public LocalDateTime getExpectedCloseDate() {
         return expectedCloseDate;
     }
 
-    public void setExpectedCloseDate(LocalDate expectedCloseDate) {
+    public void setExpectedCloseDate(LocalDateTime expectedCloseDate) {
         this.expectedCloseDate = expectedCloseDate;
     }
 

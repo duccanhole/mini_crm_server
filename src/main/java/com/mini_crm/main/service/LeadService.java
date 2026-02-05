@@ -3,6 +3,7 @@ package com.mini_crm.main.service;
 import com.mini_crm.main.dto.event.LeadCreated;
 import com.mini_crm.main.dto.event.LeadUpdated;
 import com.mini_crm.main.model.Lead;
+import com.mini_crm.main.model.User;
 import com.mini_crm.main.repository.LeadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
@@ -70,7 +71,7 @@ public class LeadService {
     }
 
     // Update
-    public Lead updateLead(Long id, Lead leadDetails) {
+    public Lead updateLead(Long id, Lead leadDetails, User updatedBy) {
         Optional<Lead> leadOptional = leadRepository.findById(id);
         if (leadOptional.isPresent()) {
             Lead existingLead = leadOptional.get();
@@ -84,7 +85,7 @@ public class LeadService {
             // updatedAt is handled by @PreUpdate in Model
             Lead leadSave = leadRepository.save(existingLead);
             if (leadSave.getCreatedBy().getId() != null) {
-                eventPublisher.publishEvent(new LeadUpdated(leadSave));
+                eventPublisher.publishEvent(new LeadUpdated(leadSave, updatedBy));
             }
             return leadSave;
         }

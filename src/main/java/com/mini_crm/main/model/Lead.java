@@ -1,7 +1,6 @@
 package com.mini_crm.main.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class Lead {
     private User assignedTo;
 
     @Column(name = "expected_close_date")
-    private LocalDate expectedCloseDate;
+    private LocalDateTime expectedCloseDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by")
@@ -61,7 +60,7 @@ public class Lead {
     public Lead() {
     }
 
-    public Lead(Customer customer, Double value, String status, User assignedTo, LocalDate expectedCloseDate,
+    public Lead(Customer customer, Double value, String status, User assignedTo, LocalDateTime expectedCloseDate,
             User createdBy) {
         this.customer = customer;
         this.value = value;
@@ -111,11 +110,11 @@ public class Lead {
         this.assignedTo = assignedTo;
     }
 
-    public LocalDate getExpectedCloseDate() {
+    public LocalDateTime getExpectedCloseDate() {
         return expectedCloseDate;
     }
 
-    public void setExpectedCloseDate(LocalDate expectedCloseDate) {
+    public void setExpectedCloseDate(LocalDateTime expectedCloseDate) {
         this.expectedCloseDate = expectedCloseDate;
     }
 
