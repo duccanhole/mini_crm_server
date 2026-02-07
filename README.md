@@ -1,7 +1,5 @@
 # Mini CRM Backend - Enterprise Relationship Management System
 
-A professional, high-performance CRM Backend built with **Spring Boot 3.4** and **Java 25 (LTS)**. This system provides a robust foundation for managing leads, customers, and business activities with real-time notification capabilities.
-
 ## 🚀 Project Overview
 This project serves as the core backend engine for a Customer Relationship Management (CRM) platform. It is designed following modern backend practices, with a strong focus on scalability, security, and real-time user engagement.
 
