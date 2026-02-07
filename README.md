@@ -85,7 +85,7 @@ src/main/java/com/mini_crm/main/
 
 ### Quick Start with Docker
 1. Clone the repository.
-2. Initialize environment: `cp .env.example .env` (Update values if necessary).
+2. Initialize the environment: copy `.env.example` to `.env` and update the values.
 3. Start the system:
    ```bash
    docker-compose up --build -d
@@ -94,7 +94,7 @@ src/main/java/com/mini_crm/main/
 
 ### Standard Run
 1. Ensure a PostgreSQL instance is running.
-2. Add `application-local.properties` to the root directory follow `application-local-example.properties` template.
+2. Add `application-local.properties` to the root directory based on the `application-local-example.properties` template.
 3. Run the application:
    ```bash
    mvn spring-boot:run
