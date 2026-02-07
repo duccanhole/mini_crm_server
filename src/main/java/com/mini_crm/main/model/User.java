@@ -34,15 +34,34 @@ public class User {
     private String role;
 
     // Relationships for cascade delete
-    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sale")
     @JsonIgnore
     private List<Customer> customers;
 
-    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PreRemove
+    private void preRemove() {
+        if (customers != null) {
+            for (Customer customer : customers) {
+                customer.setSale(null);
+            }
+        }
+        if (assignedLeads != null) {
+            for (Lead lead : assignedLeads) {
+                lead.setAssignedTo(null);
+            }
+        }
+        if (createdLeads != null) {
+            for (Lead lead : createdLeads) {
+                lead.setCreatedBy(null);
+            }
+        }
+    }
+
+    @OneToMany(mappedBy = "assignedTo")
     @JsonIgnore
     private List<Lead> assignedLeads;
 
-    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "createdBy")
     @JsonIgnore
     private List<Lead> createdLeads;
 

@@ -54,9 +54,9 @@ public class UserController {
                 user.setEmail(userCreate.getEmail());
                 user.setPhoneNumber(userCreate.getPhoneNumber());
                 user.setStatus(userCreate.getStatus());
-                user.setRole(user.getRole());
+                user.setRole(userCreate.getRole());
 
-                user.setPassword(userService.hashPassword(user.getPassword()));
+                user.setPassword(userService.hashPassword(userCreate.getPassword()));
                 User createdUser = userService.createUser(user);
                 return new ResponseEntity<>(
                                 new SuccessResponse<>("User created successfully", HttpStatus.CREATED.value(),
