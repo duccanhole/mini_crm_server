@@ -62,13 +62,15 @@ public class AuthController {
 
         if (user.isPresent()) {
             User foundUser = user.get();
+            System.out.println("Found user: " + foundUser.toString());
             // Verify password using BCrypt
             if (userService.verifyPassword(loginRequest.getPassword(), foundUser.getPassword())) {
                 String token = jwtTokenProvider.generateToken(foundUser.getEmail());
                 LoginResponse loginResponse = new LoginResponse(
                         token,
                         foundUser.getEmail(),
-                        foundUser.getRole());
+                        foundUser.getRole(),
+                        foundUser.getName());
                 SuccessResponse<LoginResponse> response = new SuccessResponse<>(
                         "Login successful",
                         HttpStatus.OK.value(),
