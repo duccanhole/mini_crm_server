@@ -97,6 +97,9 @@ src/main/java/com/mini_crm/main/
    ```bash
    mvn spring-boot:run
    ```
+#### Security Note
+- `JWT_SECRET` must be at least 256 bits (32 bytes) as required by RFC 7518 (HMAC-SHA).
+- Use a securely generated random value.
 
 ## 🚀 Notes / Future Improvements
 *   **Integration Testing:** Implement comprehensive TestContainers-based integration tests.
