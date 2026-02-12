@@ -9,6 +9,9 @@ import com.mini_crm.main.dto.auth.RegisterResponse;
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.service.UserService;
 import com.mini_crm.main.util.JwtTokenProvider;
+
+import tools.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -131,6 +134,7 @@ public class AuthController {
     // Register - POST /api/auth/register
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        System.out.println("Received RegisterRequest: " + new ObjectMapper().writeValueAsString(registerRequest));
         // Validate input
         if (registerRequest.getName() == null || registerRequest.getName().isEmpty()) {
             return new ResponseEntity<>(
@@ -164,9 +168,10 @@ public class AuthController {
                     HttpStatus.CONFLICT);
         }
 
+        System.out.println("RegisterRequest phoneNumber: " + registerRequest.getPhoneNumber());
         // Check if phoneNumber already exists (if provided)
-        if (registerRequest.getphoneNumber() != null && !registerRequest.getphoneNumber().isEmpty()) {
-            if (userService.getUserByPhoneNumber(registerRequest.getphoneNumber()).isPresent()) {
+        if (registerRequest.getPhoneNumber() != null && !registerRequest.getPhoneNumber().isEmpty()) {
+            if (userService.getUserByPhoneNumber(registerRequest.getPhoneNumber()).isPresent()) {
                 return new ResponseEntity<>(
                         new ErrorResponse("Phone number already exists", HttpStatus.CONFLICT.value()),
                         HttpStatus.CONFLICT);
@@ -177,7 +182,7 @@ public class AuthController {
         User newUser = new User();
         newUser.setName(registerRequest.getName());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setPhoneNumber(registerRequest.getphoneNumber());
+        newUser.setPhoneNumber(registerRequest.getPhoneNumber());
         // Hash password before saving
         newUser.setPassword(userService.hashPassword(registerRequest.getPassword()));
         newUser.setStatus("active");

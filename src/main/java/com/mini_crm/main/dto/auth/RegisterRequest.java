@@ -11,15 +11,6 @@ public class RegisterRequest {
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword) {
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-        this.confirmPassword = confirmPassword;
-        this.role = "user"; // Default role
-    }
-
     public RegisterRequest(String name, String email, String phoneNumber, String password, String confirmPassword,
             String role) {
         this.name = name;
@@ -46,11 +37,11 @@ public class RegisterRequest {
         this.email = email;
     }
 
-    public String getphoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setphoneNumber(String phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
