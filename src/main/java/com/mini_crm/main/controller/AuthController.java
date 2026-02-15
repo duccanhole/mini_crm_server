@@ -73,7 +73,10 @@ public class AuthController {
                         token,
                         foundUser.getEmail(),
                         foundUser.getRole(),
-                        foundUser.getName());
+                        foundUser.getName(),
+                        foundUser.getId(),
+                        foundUser.getPhoneNumber()
+                    );
                 SuccessResponse<LoginResponse> response = new SuccessResponse<>(
                         "Login successful",
                         HttpStatus.OK.value(),
