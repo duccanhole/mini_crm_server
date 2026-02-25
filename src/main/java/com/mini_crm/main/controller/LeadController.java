@@ -15,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -82,11 +84,14 @@ public class LeadController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Long assignedToId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         org.springframework.data.domain.Page<Lead> leads = leadService.getLeads(status, customerId, assignedToId,
+                createdFrom, createdTo,
                 page, size, sortBy, sortDir);
         return new ResponseEntity<>(new SuccessResponse<>(leads), HttpStatus.OK);
     }

@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -35,6 +36,8 @@ public class LeadService {
             String status,
             Long customerId,
             Long assignedToId,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
             int page,
             int size,
             String sortBy,
@@ -57,6 +60,13 @@ public class LeadService {
             }
             if (assignedToId != null) {
                 predicates.add(criteriaBuilder.equal(root.get("assignedTo").get("id"), assignedToId));
+            }
+            if (createdFrom != null && createdTo != null) {
+                predicates.add(criteriaBuilder.between(root.get("createdAt"), createdFrom, createdTo));
+            } else if (createdFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), createdFrom));
+            } else if (createdTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), createdTo));
             }
 
             return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
