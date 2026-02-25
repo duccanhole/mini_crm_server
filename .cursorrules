@@ -1,0 +1,77 @@
+# Mini CRM Server - Project Rules & Context
+
+## 1) Project Snapshot
+- Workspace root: `mini_crm_server`
+- Main Spring Boot module: `main/`
+- Purpose: backend for mini CRM (Lead, Customer, Activity, Notification, User/Auth) with JWT auth + SSE notifications.
+- Stack in codebase:
+  - Spring Boot `4.0.2`
+  - Java `25`
+  - Spring Security + JWT
+  - Spring Data JPA + PostgreSQL
+  - Maven build (`main/pom.xml`)
+
+## 2) Source Layout (important)
+- Java root: `main/src/main/java/com/mini_crm/main`
+- Main layers used consistently:
+  - `controller/` REST endpoints
+  - `service/` business logic
+  - `repository/` JPA access
+  - `model/` entities
+  - `dto/` request/response contracts
+  - `exception/` global exception mapping
+  - `filter/`, `config/`, `util/` for security/JWT
+  - `listener/`, `scheduler/` for events/background jobs
+
+## 3) API & Response Conventions
+- Base API prefix: `/api/...`
+- Success responses usually wrap with `SuccessResponse<T>`.
+- Error responses are unified by `GlobalExceptionHandler` as `ErrorResponse`.
+- For validation/business failures, prefer throwing:
+  - `BadRequestException`
+  - `ResourceNotFoundException`
+- Keep response format consistent with existing controllers.
+
+## 4) Security Conventions
+- `SecurityConfig` permits only `/api/auth/**` without auth; other routes are authenticated.
+- JWT is parsed by `JwtAuthenticationFilter`.
+- Controllers that need current user often read `Authorization` header and use `JwtTokenProvider.getEmailFromToken(token)`.
+- Header format should be `Authorization: Bearer <token>` (provider also strips `Bearer ` prefix).
+
+## 5) Data/Domain Conventions
+- Entities commonly use `LocalDateTime` timestamps (`createdAt`, `updatedAt`) with `@PrePersist/@PreUpdate`.
+- Lead status is currently stored as `String` (not enum) in existing code.
+- For list endpoints, project commonly supports filter + pagination + sort.
+- Dynamic filtering pattern in service uses `JpaSpecificationExecutor` + `Specification`.
+
+## 6) Working Rules For Future Sessions
+When adding/changing a feature, follow this order:
+1. Update DTOs if request/response contract changes.
+2. Update controller endpoint signature and docs/comments.
+3. Implement business logic in service (avoid putting logic in controller).
+4. Update repository only when needed (custom query/spec support).
+5. Reuse existing exception types and response wrappers.
+6. Keep naming and package style aligned with existing files.
+
+## 7) Lead Module Notes
+- Main files:
+  - `controller/LeadController.java`
+  - `service/LeadService.java`
+  - `repository/LeadRepository.java`
+  - `model/Lead.java`
+- Existing list endpoint (`GET /api/leads`) already supports table-style pagination/filter/sort.
+- Keep lead create/update event publishing behavior intact (`LeadCreated`, `LeadUpdated`) when refactoring.
+
+## 8) Local Run & Verification
+- Recommended commands from module `main/`:
+  - Run app: `mvn spring-boot:run`
+  - Run tests: `mvn test`
+- Environment notes:
+  - PostgreSQL required
+  - JWT secret must satisfy HMAC length requirements
+
+## 9) Coding Style Preferences For This Repo
+- Keep code simple and explicit (project mostly avoids Lombok).
+- Follow current style: straightforward POJOs + getters/setters in DTO/model.
+- Avoid introducing large framework/style changes unless requested.
+- Maintain backward compatibility for existing endpoints unless user asks to break/change contract.
