@@ -79,11 +79,12 @@ public class ActivityController {
     public ResponseEntity<?> getActivities(
             @RequestParam(required = false) Long leadId,
             @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long createdById,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
-        Page<Activity> activities = activityService.getActivities(leadId, type, page, size, sortBy, sortDir);
+        Page<Activity> activities = activityService.getActivities(leadId, type, createdById, page, size, sortBy, sortDir);
         return new ResponseEntity<>(new SuccessResponse<>(activities), HttpStatus.OK);
     }
 

@@ -45,6 +45,7 @@ public class ActivityService {
     public Page<Activity> getActivities(
             Long leadId,
             String type,
+            Long createdById,
             int page,
             int size,
             String sortBy,
@@ -58,8 +59,12 @@ public class ActivityService {
         Specification<Activity> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+
             if (leadId != null) {
                 predicates.add(criteriaBuilder.equal(root.get("lead").get("id"), leadId));
+            }
+            if (createdById != null) {
+                predicates.add(criteriaBuilder.equal(root.get("createdBy").get("id"), createdById));
             }
             if (type != null && !type.isEmpty()) {
                 predicates.add(criteriaBuilder.equal(root.get("type"), type));
