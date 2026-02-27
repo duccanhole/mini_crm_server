@@ -6,7 +6,6 @@ import com.mini_crm.main.model.Lead;
 import com.mini_crm.main.model.User;
 import com.mini_crm.main.repository.LeadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -109,5 +108,69 @@ public class LeadService {
             return true;
         }
         return false;
+    }
+
+    public long getLeadCount(String status, Long customerId, Long assignedToId, LocalDateTime createdFrom, LocalDateTime createdTo) {
+        org.springframework.data.jpa.domain.Specification<Lead> spec = (root, query, criteriaBuilder) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (status != null && !status.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (customerId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), customerId));
+            }
+            if (assignedToId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("assignedTo").get("id"), assignedToId));
+            }
+            if (createdFrom != null && createdTo != null) {
+                predicates.add(criteriaBuilder.between(root.get("createdAt"), createdFrom, createdTo));
+            } else if (createdFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), createdFrom));
+            } else if (createdTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), createdTo));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return leadRepository.count(spec);
+    }
+
+    public double getLeadValue(
+            String status,
+            Long customerId,
+            Long assignedToId,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo) {
+        org.springframework.data.jpa.domain.Specification<Lead> spec = (root, query, criteriaBuilder) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (status != null && !status.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (customerId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), customerId));
+            }
+            if (assignedToId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("assignedTo").get("id"), assignedToId));
+            }
+            if (createdFrom != null && createdTo != null) {
+                predicates.add(criteriaBuilder.between(root.get("createdAt"), createdFrom, createdTo));
+            } else if (createdFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), createdFrom));
+            } else if (createdTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), createdTo));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return leadRepository.findAll(spec)
+                .stream()
+                .map(Lead::getValue)
+                .filter(java.util.Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
+                .sum();
     }
 }

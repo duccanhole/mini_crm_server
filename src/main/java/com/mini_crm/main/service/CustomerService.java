@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -124,5 +125,39 @@ public class CustomerService {
 
     public Optional<Customer> findByPhone(String phone) {
         return customerRepository.findByPhone(phone);
+    }
+
+    public long getCustomerCount(String search, Long saleId, LocalDate createdFrom, LocalDate createdTo) {
+        org.springframework.data.jpa.domain.Specification<Customer> spec = (root, query, criteriaBuilder) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (search != null && !search.isEmpty()) {
+                String searchLike = "%" + search.toLowerCase() + "%";
+                jakarta.persistence.criteria.Predicate namePredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("name")), searchLike);
+                jakarta.persistence.criteria.Predicate emailPredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("email")), searchLike);
+                jakarta.persistence.criteria.Predicate phonePredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("phone")), searchLike);
+                jakarta.persistence.criteria.Predicate companyPredicate = criteriaBuilder
+                        .like(criteriaBuilder.lower(root.get("company")), searchLike);
+
+                predicates.add(criteriaBuilder.or(namePredicate, emailPredicate, phonePredicate, companyPredicate));
+            }
+            if (saleId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("sale").get("id"), saleId));
+            }
+            if (createdFrom != null && createdTo != null) {
+                predicates.add(criteriaBuilder.between(root.get("createdAt"), createdFrom, createdTo));
+            } else if (createdFrom != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), createdFrom));
+            } else if (createdTo != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), createdTo));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return customerRepository.count(spec);
     }
 }

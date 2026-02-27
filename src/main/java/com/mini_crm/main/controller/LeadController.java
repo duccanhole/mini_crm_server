@@ -158,4 +158,26 @@ public class LeadController {
                 new SuccessResponse<>(),
                 HttpStatus.OK);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<?> getLeadCount(@RequestParam(required = false) String status,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(required = false) Long assignedToId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo) {
+        long count = leadService.getLeadCount(status, customerId, assignedToId, createdFrom, createdTo);
+        return new ResponseEntity<>(new SuccessResponse<>(count), HttpStatus.OK);
+    }
+
+    @GetMapping("/value")
+    public ResponseEntity<?> getLeadValue(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(required = false) Long assignedToId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo) {
+        double totalValue = leadService.getLeadValue(status, customerId, assignedToId, createdFrom, createdTo);
+        return new ResponseEntity<>(new SuccessResponse<>(totalValue), HttpStatus.OK);
+    }
+
 }
