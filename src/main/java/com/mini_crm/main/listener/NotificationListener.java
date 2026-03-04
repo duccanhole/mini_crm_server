@@ -22,6 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+enum NotificationType {
+    CUSTOMER_ASSIGNED,
+    ACTIVITY_CREATED,
+    LEAD_CREATED,
+    LEAD_UPDATED
+}
+
 @Component
 public class NotificationListener {
     private static final Logger logger = LoggerFactory.getLogger(NotificationListener.class);
@@ -38,7 +45,7 @@ public class NotificationListener {
         logger.info("Customer assigned: {}", customer);
         Notification notification = new Notification();
         notification.setUser(customer.getSale());
-        notification.setType("CUSTOMER_ASSIGNED");
+        notification.setType(NotificationType.CUSTOMER_ASSIGNED.name());
         notification.setTitle("Customer assigned");
         notification.setMessage("You have been assigned a new customer");
         notification.setRead(false);
@@ -52,7 +59,7 @@ public class NotificationListener {
         logger.info("Customer assigned: {}", customer);
         Notification notification = new Notification();
         notification.setUser(customer.getSale());
-        notification.setType("CUSTOMER_ASSIGNED");
+        notification.setType(NotificationType.CUSTOMER_ASSIGNED.name());
         notification.setTitle("Customer assigned");
         notification.setMessage("You have been assigned a new customer");
         notification.setRead(false);
@@ -70,7 +77,7 @@ public class NotificationListener {
         if (createdBy.getRole().equals("manager") || createdBy.getRole().equals("admin")) {
             Notification notification = new Notification();
             notification.setUser(createdBy);
-            notification.setType("ACTIVITY_CREATED");
+            notification.setType(NotificationType.ACTIVITY_CREATED.name());
             notification.setTitle("Activity created");
             notification.setMessage("Lead has been updated activity");
             notification.setRead(false);
@@ -88,7 +95,7 @@ public class NotificationListener {
         if (createdBy.getId() != sale.getId()) {
             Notification notification = new Notification();
             notification.setUser(sale);
-            notification.setType("LEAD_CREATED");
+            notification.setType(NotificationType.LEAD_CREATED.name());
             notification.setTitle("Lead created");
             notification.setMessage("You have been assigned a new lead");
             notification.setRead(false);
@@ -106,7 +113,7 @@ public class NotificationListener {
         if (createdBy.getId() != updatedBy.getId()) {
             Notification notification = new Notification();
             notification.setUser(createdBy);
-            notification.setType("LEAD_UPDATED");
+            notification.setType(NotificationType.LEAD_UPDATED.name());
             notification.setTitle("Lead updated");
             notification.setMessage("Lead has been updated");
             notification.setRead(false);
