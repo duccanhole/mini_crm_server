@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -66,6 +67,11 @@ public class AuthController {
         if (user.isPresent()) {
             User foundUser = user.get();
             System.out.println("Found user: " + foundUser.toString());
+            if(!foundUser.getStatus().equalsIgnoreCase("active")) {
+                return new ResponseEntity<>(
+                        new ErrorResponse("User account is not active", HttpStatus.UNAUTHORIZED.value()),
+                        HttpStatus.UNAUTHORIZED);
+            }
             // Verify password using BCrypt
             if (userService.verifyPassword(loginRequest.getPassword(), foundUser.getPassword())) {
                 String token = jwtTokenProvider.generateToken(foundUser.getEmail());
@@ -210,7 +216,8 @@ public class AuthController {
         Optional<User> adminUser = userService.getUserByEmail(adminEmail);
         Optional<User> managerUser = userService.getUserByEmail(managerEmail);
         Optional<User> saleUser = userService.getUserByEmail(saleEmail);
-
+        System.out.println("Sale email: " + saleEmail);
+        
         if (!adminUser.isPresent()) {
             User admin = new User();
             admin.setName("Admin");
