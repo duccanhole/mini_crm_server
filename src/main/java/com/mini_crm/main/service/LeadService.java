@@ -24,7 +24,7 @@ public class LeadService {
     // Create
     public Lead createLead(Lead lead) {
         Lead newLead = leadRepository.save(lead);
-        if (newLead.getAssignedTo().getId() != null) {
+        if (newLead.getAssignedTo() != null && newLead.getAssignedTo().getId() != null) {
             eventPublisher.publishEvent(new LeadCreated(newLead));
         }
         return lead;
@@ -93,7 +93,7 @@ public class LeadService {
             // createdAt is not updated
             // updatedAt is handled by @PreUpdate in Model
             Lead leadSave = leadRepository.save(existingLead);
-            if (leadSave.getCreatedBy().getId() != null) {
+            if (leadSave.getCreatedBy() != null && leadSave.getCreatedBy().getId() != null) {
                 eventPublisher.publishEvent(new LeadUpdated(leadSave, updatedBy));
             }
             return leadSave;

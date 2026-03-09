@@ -8,7 +8,7 @@ The system exposes RESTful APIs to manage the lifecycle of Leads and Customers, 
 The primary goal of this project is to demonstrate practical backend engineering skills, system design thinking, and product-oriented development, rather than to deliver a fully-featured enterprise CRM solution.
 
 ## 🛠 Tech Stack
-*   **Framework:** Spring Boot 3.4.2
+*   **Framework:** Spring Boot 4.0.2
 *   **Language:** Java 25 (LTS)
 *   **Security:** Spring Security & Stateless JWT
 *   **Persistence:** Spring Data JPA (Hibernate)
@@ -48,7 +48,7 @@ The system utilizes **Server-Sent Events (SSE)** to push notifications to the fr
 
 ## 🔐 Authentication Flow (JWT)
 The project implements a secure, stateless authentication mechanism:
-1.  **Login:** User provides credentials via the `/auth/login` endpoint.
+1.  **Login:** User provides credentials via the `/api/auth/login` endpoint.
 2.  **Token Generation:** Upon successful validation, the server generates a signed JWT containing user claims and roles.
 3.  **Client Storage:** The client stores this token (usually in local storage/cookies).
 4.  **Authorized Requests:** For subsequent API calls, the client includes the JWT in the `Authorization: Bearer <token>` header.
@@ -100,6 +100,14 @@ src/main/java/com/mini_crm/main/
 #### Security Note
 - `JWT_SECRET` must be at least 256 bits (32 bytes) as required by RFC 7518 (HMAC-SHA).
 - Use a securely generated random value.
+
+## Unit Testing
+The project uses JUnit 5 + Mockito for unit tests.
+
+Current test strategy focuses on:
+*   Service-layer business logic
+*   Success and edge/error paths
+*   Event-driven behaviors and key validation/security-related logic
 
 ## 🚀 Notes / Future Improvements
 *   **Integration Testing:** Implement comprehensive TestContainers-based integration tests.
