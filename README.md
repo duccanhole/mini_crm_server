@@ -101,7 +101,7 @@ src/main/java/com/mini_crm/main/
 - `JWT_SECRET` must be at least 256 bits (32 bytes) as required by RFC 7518 (HMAC-SHA).
 - Use a securely generated random value.
 
-## Unit Testing
+## 🧪 Unit Testing
 The project uses JUnit 5 + Mockito for unit tests.
 
 Current test strategy focuses on:
